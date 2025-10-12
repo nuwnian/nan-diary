@@ -39,7 +39,7 @@ waitForFirebase().then(() => {
             console.log('User signed in:', user.email);
             loadProjectsFromCloud();
             if (signInBtn) {
-                    signInBtn.textContent = '� ' + (user.displayName || user.email);
+                signInBtn.textContent = '👤 ' + (user.displayName || user.email);
                 signInBtn.onclick = () => window.firebaseAuth.signOut();
             }
         } else {
