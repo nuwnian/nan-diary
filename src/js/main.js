@@ -1,55 +1,87 @@
 // --- Firebase Setup ---
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
 let userId = null;
+let isFirebaseReady = false;
 
-function signInWithGoogle() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then((result) => {
-        userId = result.user.uid;
-        loadProjectsFromCloud();
+// Wait for Firebase to be loaded
+function waitForFirebase() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (window.firebaseAuth && window.firebaseDb) {
+                isFirebaseReady = true;
+                resolve();
+            } else {
+                setTimeout(check, 100);
+            }
+        };
+        check();
     });
 }
 
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        userId = user.uid;
+async function signInWithGoogle() {
+    await waitForFirebase();
+    const provider = new window.GoogleAuthProvider();
+    try {
+        const result = await window.signInWithPopup(window.firebaseAuth, provider);
+        userId = result.user.uid;
         loadProjectsFromCloud();
-    } else {
-        userId = null;
-        // Show sign-in button or prompt
-        // Optionally: signInWithGoogle();
+        console.log('Signed in successfully');
+    } catch (error) {
+        console.error('Sign in failed:', error);
     }
+}
+
+// Initialize auth state listener when Firebase is ready
+waitForFirebase().then(() => {
+    window.onAuthStateChanged(window.firebaseAuth, (user) => {
+        const signInBtn = document.getElementById('signInBtn');
+        if (user) {
+            userId = user.uid;
+            console.log('User signed in:', user.email);
+            loadProjectsFromCloud();
+            if (signInBtn) {
+                signInBtn.textContent = '👤 ' + (user.displayName || user.email);
+                signInBtn.onclick = () => window.firebaseAuth.signOut();
+            }
+        } else {
+            userId = null;
+            console.log('User signed out');
+            if (signInBtn) {
+                signInBtn.textContent = 'Sign In';
+                signInBtn.onclick = signInWithGoogle;
+            }
+            // Uncomment to auto-sign in: signInWithGoogle();
+        }
+    });
 });
 
-function loadProjectsFromCloud() {
-    if (!userId) return;
-    db.collection('diaryProjects').doc(userId).get().then((doc) => {
-        if (doc.exists) {
-            const data = doc.data();
+async function loadProjectsFromCloud() {
+    if (!userId || !isFirebaseReady) return;
+    try {
+        const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
+        const docSnap = await window.getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
             if (data.projects) {
                 projects.length = 0;
                 projects.push(...data.projects);
                 renderProjects();
+                console.log('Projects loaded from cloud');
             }
         }
-    });
+    } catch (error) {
+        console.error('Error loading from cloud:', error);
+    }
 }
 
-function saveProjectsToCloud() {
-    if (!userId) return;
-    db.collection('diaryProjects').doc(userId).set({ projects });
+async function saveProjectsToCloud() {
+    if (!userId || !isFirebaseReady) return;
+    try {
+        const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
+        await window.setDoc(docRef, { projects });
+        console.log('Projects saved to cloud');
+    } catch (error) {
+        console.error('Error saving to cloud:', error);
+    }
 }
 const emojis = ['🌸', '🍂', '☁️', '✨', '🌙', '🌿', '🎨', '📖', '🕊️', '🦋'];
 
@@ -147,6 +179,7 @@ function selectDetailEmoji(emoji) {
         
         // Update the main grid (this will be visible when user closes detail)
         renderProjects();
+        saveProjectsToCloud(); // Save to cloud after emoji change
     }
 }
 
@@ -179,6 +212,7 @@ function performDelete(index) {
     if (index >= 0 && index < projects.length) {
         projects.splice(index, 1);
         renderProjects();
+        saveProjectsToCloud(); // Save to cloud after deletion
         if (currentProjectIndex === index) {
             document.getElementById('detailView').style.display = 'none';
             document.body.style.overflow = 'auto';
@@ -318,6 +352,7 @@ function closeDetail() {
         projects[currentProjectIndex].title = document.getElementById('detailTitle').value;
         projects[currentProjectIndex].notes = document.getElementById('detailNotes').innerHTML;
         renderProjects();
+        saveProjectsToCloud(); // Save to cloud when closing detail (saves title and notes changes)
     }
     document.getElementById('detailView').style.display = 'none';
     document.body.style.overflow = 'auto';
@@ -333,6 +368,7 @@ function addNewProject() {
     };
     projects.unshift(newProject);
     renderProjects();
+    saveProjectsToCloud(); // Save to cloud after adding new project
     openDetail(0);
 }
 
