@@ -3,134 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nan Diary</title>
-    <link rel="stylesheet" href="src/css/style.css">
-    <!-- Firebase JS SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, collection } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs",
-            authDomain: "nan-diary-6cdba.firebaseapp.com",
-            projectId: "nan-diary-6cdba",
-            storageBucket: "nan-diary-6cdba.firebasestorage.app",
-            messagingSenderId: "709052515369",
-            appId: "1:709052515369:web:0457058cd8b7d22010c838",
-            measurementId: "G-KJZR72YVR8"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const analytics = getAnalytics(app);
-
-        // Make Firebase services available globally
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.GoogleAuthProvider = GoogleAuthProvider;
-        window.signInWithPopup = signInWithPopup;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.getDoc = getDoc;
-        window.collection = collection;
-    </script>
+    <title>Welcome to Nan Diary</title>
+    <link rel="stylesheet" href="src/css/welcome.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">
-            <span class="sparkle">✨</span>
-            Nan Diary
-        </div>
-        <div class="nav-right">
-            <input type="text" class="search-bar" placeholder="Search projects..." id="searchBar">
-            <button class="sign-in-btn" onclick="signInWithGoogle()" id="signInBtn">Sign In</button>
-            <button class="add-btn" onclick="addNewProject()">+ Add Plan</button>
-        </div>
-    </nav>
-    
-    <div class="container">
-        <div class="projects-grid" id="projectsGrid">
-            <div class="project-card" onclick="openDetail(0)">
-                <div class="card-image">🌸</div>
-                <div class="card-content">
-                    <div class="card-title">Spring Collection</div>
-                    <div class="card-date">October 10, 2025</div>
+    <div class="welcome-page">
+        <div class="welcome-container">
+            <div class="welcome-logo">📖</div>
+            <h1 class="welcome-title">
+                <span class="welcome-sparkle">✨</span>
+                Nan Diary
+                <span class="welcome-sparkle">✨</span>
+            </h1>
+            <p class="welcome-subtitle">
+                Your cozy corner for dreaming, planning, and creating beautiful projects. 
+                A safe space where every idea has a home.
+            </p>
+            
+            <div class="welcome-features">
+                <div class="feature-item">
+                    <div class="feature-icon">🌸</div>
+                    <div class="feature-text">Organize Ideas</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-text">Track Progress</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">☁️</div>
+                    <div class="feature-text">Dream Big</div>
                 </div>
             </div>
             
-            <div class="project-card" onclick="openDetail(1)">
-                <div class="card-image">🍂</div>
-                <div class="card-content">
-                    <div class="card-title">Autumn Curriculum</div>
-                    <div class="card-date">October 8, 2025</div>
-                </div>
-            </div>
-            
-            <div class="project-card" onclick="openDetail(2)">
-                <div class="card-image">☁️</div>
-                <div class="card-content">
-                    <div class="card-title">Dream Project</div>
-                    <div class="card-date">October 5, 2025</div>
-                </div>
-            </div>
+            <button class="sign-in-btn" onclick="enterDiary()">Enter Your Diary ✨</button>
         </div>
     </div>
     
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-title">Your Creative Space ✨</div>
-            <p class="footer-text">
-                Nan Diary is your cozy corner for dreaming, planning, and creating. 
-                Every project is a step in your beautiful journey.
-            </p>
-            <div class="footer-icons">
-                <span class="footer-icon">🌙</span>
-                <span class="footer-icon">🌿</span>
-                <span class="footer-icon">☁️</span>
-            </div>
-            <p class="footer-text">
-                Made with <span class="footer-heart">♥</span> for creative souls
-            </p>
-        </div>
-    </footer>
-    
-    <div class="detail-view" id="detailView">
-        <div class="detail-content">
-            <button class="close-btn" onclick="closeDetail()">×</button>
-            <div class="detail-header">
-                <input type="text" class="detail-title" id="detailTitle" placeholder="Project Title">
-                <button class="detail-emoji-btn" id="detailEmojiBtn" aria-label="Change emoji">🎨</button>
-            </div>
-            <div class="detail-date" id="detailDate">October 12, 2025</div>
-            <div class="detail-emoji-picker" id="detailEmojiPicker" style="display: none;"></div>
-            <div class="detail-toolbar">
-                <button type="button" class="toolbar-btn" id="boldBtn" title="Bold"><b>B</b></button>
-                <span class="toolbar-separator">|</span>
-                <button type="button" class="toolbar-btn" id="bulletBtn" title="Bullets">&#8226;</button>
-                <span class="toolbar-separator">|</span>
-                <input type="number" id="fontSizeInput" class="toolbar-input" title="Font Size (px)" min="10" max="48" value="16" />
-            </div>
-            <div contenteditable="true" class="detail-notes" id="detailNotes" placeholder="Write your plans, notes, and ideas here..."></div>
-        </div>
-    </div>
-    
-    <!-- Delete confirmation modal -->
-    <div class="confirm-view" id="confirmView" style="display:none;">
-        <div class="confirm-content">
-            <div class="confirm-message">Are you sure you want to delete this diary?</div>
-            <div class="confirm-actions">
-                <button id="confirmCancel" class="confirm-btn">Cancel</button>
-                <button id="confirmOk" class="confirm-btn confirm-ok">Delete</button>
-            </div>
-        </div>
-    </div>
-    
-    <script src="src/js/main.js"></script>
+    <script src="src/js/welcome.js"></script>
 </body>
 </html>

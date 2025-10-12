@@ -30,26 +30,42 @@ async function signInWithGoogle() {
     }
 }
 
+function signOutUser() {
+    window.firebaseAuth.signOut();
+}
+
 // Initialize auth state listener when Firebase is ready
 waitForFirebase().then(() => {
     window.onAuthStateChanged(window.firebaseAuth, (user) => {
         const signInBtn = document.getElementById('signInBtn');
+        const signOutBtn = document.getElementById('signOutBtn');
+        
         if (user) {
             userId = user.uid;
             console.log('User signed in:', user.email);
             loadProjectsFromCloud();
+            
+            // Show user info and sign out button
             if (signInBtn) {
-                signInBtn.textContent = '👤 ' + (user.displayName || user.email);
-                signInBtn.onclick = () => window.firebaseAuth.signOut();
+                signInBtn.textContent = '👩 ' + (user.displayName || user.email || 'User');
+                signInBtn.style.display = 'block';
+            }
+            if (signOutBtn) {
+                signOutBtn.style.display = 'block';
             }
         } else {
             userId = null;
             console.log('User signed out');
+            
+            // Show sign in button, hide sign out button
             if (signInBtn) {
                 signInBtn.textContent = 'Sign In';
                 signInBtn.onclick = signInWithGoogle;
+                signInBtn.style.display = 'block';
             }
-            // Uncomment to auto-sign in: signInWithGoogle();
+            if (signOutBtn) {
+                signOutBtn.style.display = 'none';
+            }
         }
     });
 });
