@@ -129,6 +129,17 @@ body {
     box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
 }
 
+.sign-in-btn.signed-in {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    cursor: default;
+    opacity: 0.9;
+}
+
+.sign-in-btn.signed-in:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;

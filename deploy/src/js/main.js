@@ -36,18 +36,23 @@ function signOutUser() {
 
 // Initialize auth state listener when Firebase is ready
 waitForFirebase().then(() => {
+    console.log('Firebase is ready, setting up auth listener');
     window.onAuthStateChanged(window.firebaseAuth, (user) => {
+        console.log('Auth state changed. User:', user ? 'signed in' : 'signed out');
         const signInBtn = document.getElementById('signInBtn');
         const signOutBtn = document.getElementById('signOutBtn');
+        console.log('Sign in button found:', !!signInBtn, 'Sign out button found:', !!signOutBtn);
         
         if (user) {
             userId = user.uid;
             console.log('User signed in:', user.email);
             loadProjectsFromCloud();
             
-            // Show user info and sign out button
+            // Show user info (make it non-clickable) and show sign out button
             if (signInBtn) {
                 signInBtn.textContent = '👩 ' + (user.displayName || user.email || 'User');
+                signInBtn.onclick = null; // Remove click handler
+                signInBtn.classList.add('signed-in'); // Add signed-in styling
                 signInBtn.style.display = 'block';
             }
             if (signOutBtn) {
@@ -57,10 +62,11 @@ waitForFirebase().then(() => {
             userId = null;
             console.log('User signed out');
             
-            // Show sign in button, hide sign out button
+            // Show active sign in button, hide sign out button
             if (signInBtn) {
                 signInBtn.textContent = 'Sign In';
                 signInBtn.onclick = signInWithGoogle;
+                signInBtn.classList.remove('signed-in'); // Remove signed-in styling
                 signInBtn.style.display = 'block';
             }
             if (signOutBtn) {
