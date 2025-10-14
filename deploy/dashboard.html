@@ -47,12 +47,20 @@
             <span class="sparkle">✨</span>
             Nan Diary
         </div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Open menu" onclick="toggleMobileMenu()">☰</button>
         <div class="nav-right">
             <input type="text" class="search-bar" placeholder="Search projects..." id="searchBar">
             <button class="sign-in-btn" onclick="signInWithGoogle()" id="signInBtn">Sign In</button>
             <button class="sign-out-btn" onclick="signOutUser()" id="signOutBtn" style="display:none;">Sign Out</button>
             <button class="add-btn" onclick="addNewProject()">+ Add Plan</button>
         </div>
+        <div class="mobile-menu" id="mobileMenu" style="display:none;">
+            <input type="text" class="search-bar mobile" placeholder="Search projects..." id="mobileSearch">
+            <button class="sign-in-btn" onclick="signInWithGoogle()" id="mobileSignInBtn">Sign In</button>
+            <button class="sign-out-btn" onclick="signOutUser()" id="mobileSignOutBtn" style="display:none;">Sign Out</button>
+            <button class="add-btn" onclick="addNewProject()">+ Add Plan</button>
+        </div>
+        <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="toggleMobileMenu()" style="display:none;"></div>
     </nav>
     
     <div class="container">
@@ -132,6 +140,12 @@
         </div>
     </div>
     
-    <script src="src/js/main.js"></script>
+    <script type="module">
+        // Import security utilities
+        import SecurityUtils from './src/js/security.js';
+        // Make SecurityUtils available globally for main.js
+        window.SecurityUtils = SecurityUtils;
+    </script>
+    <script src="src/js/main.js?v=4"></script>
 </body>
 </html>

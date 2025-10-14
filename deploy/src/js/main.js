@@ -2,6 +2,9 @@
 let userId = null;
 let isFirebaseReady = false;
 
+// Security utilities will be loaded via script tag
+// Import SecurityUtils from './security.js' when using modules
+
 // Wait for Firebase to be loaded
 function waitForFirebase() {
     return new Promise((resolve) => {
@@ -27,6 +30,19 @@ async function signInWithGoogle() {
         console.log('Signed in successfully');
     } catch (error) {
         console.error('Sign in failed:', error);
+        // Helpful guidance for common Firebase auth error when domain not authorized
+        try {
+            const code = error && error.code ? error.code : '';
+            if (code === 'auth/unauthorized-domain') {
+                const origin = window.location.origin || window.location.href;
+                const msg = `Sign-in blocked: the domain ${origin} is not authorized for Firebase Authentication.\n\nTo fix: open your Firebase Console -> Authentication -> Settings -> Authorized domains and add:\n${origin}`;
+                // Show an alert to the user and log a console link for advanced users
+                alert(msg);
+                console.info('Open Firebase Console -> Authentication -> Settings and add the domain above.');
+            }
+        } catch (e) {
+            // ignore secondary errors while reporting
+        }
     }
 }
 
@@ -41,16 +57,21 @@ waitForFirebase().then(() => {
         console.log('Auth state changed. User:', user ? 'signed in' : 'signed out');
         const signInBtn = document.getElementById('signInBtn');
         const signOutBtn = document.getElementById('signOutBtn');
+        const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+        const mobileSignOutBtn = document.getElementById('mobileSignOutBtn');
         console.log('Sign in button found:', !!signInBtn, 'Sign out button found:', !!signOutBtn);
+        console.log('Mobile sign in button found:', !!mobileSignInBtn, 'Mobile sign out button found:', !!mobileSignOutBtn);
         
         if (user) {
             userId = user.uid;
             console.log('User signed in:', user.email);
             loadProjectsFromCloud();
             
-            // Show user info (make it non-clickable) and show sign out button
+            const displayName = user.displayName || user.email || 'User';
+            
+            // Update desktop buttons - Show user info (make it non-clickable) and show sign out button
             if (signInBtn) {
-                signInBtn.textContent = '👩 ' + (user.displayName || user.email || 'User');
+                signInBtn.textContent = displayName;
                 signInBtn.onclick = null; // Remove click handler
                 signInBtn.classList.add('signed-in'); // Add signed-in styling
                 signInBtn.style.display = 'block';
@@ -58,11 +79,22 @@ waitForFirebase().then(() => {
             if (signOutBtn) {
                 signOutBtn.style.display = 'block';
             }
+            
+            // Update mobile buttons - Show user info and show sign out button
+            if (mobileSignInBtn) {
+                mobileSignInBtn.textContent = displayName;
+                mobileSignInBtn.onclick = null; // Remove click handler
+                mobileSignInBtn.classList.add('signed-in'); // Add signed-in styling
+                mobileSignInBtn.style.display = 'block';
+            }
+            if (mobileSignOutBtn) {
+                mobileSignOutBtn.style.display = 'block';
+            }
         } else {
             userId = null;
             console.log('User signed out');
             
-            // Show active sign in button, hide sign out button
+            // Update desktop buttons - Show active sign in button, hide sign out button
             if (signInBtn) {
                 signInBtn.textContent = 'Sign In';
                 signInBtn.onclick = signInWithGoogle;
@@ -71,6 +103,17 @@ waitForFirebase().then(() => {
             }
             if (signOutBtn) {
                 signOutBtn.style.display = 'none';
+            }
+            
+            // Update mobile buttons - Show active sign in button, hide sign out button
+            if (mobileSignInBtn) {
+                mobileSignInBtn.textContent = 'Sign In';
+                mobileSignInBtn.onclick = signInWithGoogle;
+                mobileSignInBtn.classList.remove('signed-in'); // Remove signed-in styling
+                mobileSignInBtn.style.display = 'block';
+            }
+            if (mobileSignOutBtn) {
+                mobileSignOutBtn.style.display = 'none';
             }
         }
     });
@@ -97,12 +140,53 @@ async function loadProjectsFromCloud() {
 
 async function saveProjectsToCloud() {
     if (!userId || !isFirebaseReady) return;
+    
     try {
+        // Validate user session
+        await window.SecurityUtils?.validateUserSession(window.firebaseAuth);
+        
+        // Rate limiting check
+        if (!window.SecurityUtils?.checkRateLimit(userId, 'save_projects', 20, 60000)) {
+            window.SecurityUtils?.logSecurityEvent('rate_limit_exceeded', { action: 'save_projects', userId });
+            throw new Error('Rate limit exceeded. Please try again later.');
+        }
+        
+        // Validate and sanitize all projects before saving
+        const sanitizedProjects = projects.map(project => {
+            // Validate title
+            if (!window.SecurityUtils?.validateTitle(project.title)) {
+                window.SecurityUtils?.logSecurityEvent('invalid_title', { title: project.title, userId });
+                throw new Error('Invalid project title detected');
+            }
+            
+            // Validate notes  
+            if (!window.SecurityUtils?.validateNotes(project.notes || '')) {
+                window.SecurityUtils?.logSecurityEvent('invalid_notes', { userId });
+                throw new Error('Invalid project notes detected');
+            }
+            
+            return {
+                title: window.SecurityUtils?.sanitizeHTML(project.title) || project.title,
+                notes: window.SecurityUtils?.sanitizeRichText(project.notes || '') || project.notes,
+                emoji: project.emoji, // Emojis are safe
+                date: project.date
+            };
+        });
+        
         const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
-        await window.setDoc(docRef, { projects });
+        await window.setDoc(docRef, { projects: sanitizedProjects });
         console.log('Projects saved to cloud');
     } catch (error) {
         console.error('Error saving to cloud:', error);
+        
+        // Show user-friendly error message
+        if (error.message.includes('Rate limit')) {
+            alert('You are saving too frequently. Please wait a moment before saving again.');
+        } else if (error.message.includes('Invalid')) {
+            alert('Please check your project content. Some content may contain unsafe characters.');
+        } else {
+            alert('Failed to save your projects. Please try again.');
+        }
     }
 }
 const emojis = ['🌸', '🍂', '☁️', '✨', '🌙', '🌿', '🎨', '📖', '🕊️', '🦋'];
@@ -411,3 +495,27 @@ document.getElementById('detailView').addEventListener('click', (e) => {
 
 // Initial render
 renderProjects();
+// Toggle mobile menu open/close
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const backdrop = document.getElementById('mobileMenuBackdrop');
+    if (!menu || !backdrop) return;
+    const isOpen = menu.classList.contains('open');
+    if (isOpen) {
+        menu.classList.remove('open');
+        backdrop.classList.remove('visible');
+        // hide inline styles for display (keeps initial state)
+        setTimeout(() => {
+            menu.style.display = 'none';
+            backdrop.style.display = 'none';
+        }, 220);
+    } else {
+        menu.style.display = 'flex';
+        backdrop.style.display = 'block';
+        // Allow layout then open
+        requestAnimationFrame(() => menu.classList.add('open'));
+        backdrop.classList.add('visible');
+    }
+}
+// Expose to global so inline onclick in HTML can find it
+window.toggleMobileMenu = toggleMobileMenu;
