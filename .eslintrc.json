@@ -1,0 +1,40 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "globals": {
+    "window": "readonly",
+    "document": "readonly",
+    "console": "readonly",
+    "firebase": "readonly",
+    "toggleMobileMenu": "writable"
+  },
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": "error",
+    "curly": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "no-undef": "warn",
+    "semi": ["error", "always"],
+    "quotes": ["warn", "single", { "allowTemplateLiterals": true }]
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "deploy/",
+    "public/",
+    ".firebase/"
+  ]
+}

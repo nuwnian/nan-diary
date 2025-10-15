@@ -120,7 +120,7 @@ waitForFirebase().then(() => {
 });
 
 async function loadProjectsFromCloud() {
-    if (!userId || !isFirebaseReady) return;
+    if (!userId || !isFirebaseReady) {return;}
     try {
         const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
         const docSnap = await window.getDoc(docRef);
@@ -139,7 +139,7 @@ async function loadProjectsFromCloud() {
 }
 
 async function saveProjectsToCloud() {
-    if (!userId || !isFirebaseReady) return;
+    if (!userId || !isFirebaseReady) {return;}
     
     try {
         // Validate user session
@@ -241,7 +241,7 @@ function buildEmojiPicker(index) {
 
 function toggleDetailEmojiPicker() {
     const picker = document.getElementById('detailEmojiPicker');
-    if (!picker) return;
+    if (!picker) {return;}
     
     if (picker.style.display === 'none') {
         // Show picker
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bulletBtn = document.getElementById('bulletBtn');
     const detailNotes = document.getElementById('detailNotes');
     function updateToolbarState() {
-        if (!detailNotes) return;
+        if (!detailNotes) {return;}
         // Bold button
         if (document.queryCommandState('bold')) {
             boldBtn.classList.add('active');
@@ -499,7 +499,7 @@ renderProjects();
 function toggleMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     const backdrop = document.getElementById('mobileMenuBackdrop');
-    if (!menu || !backdrop) return;
+    if (!menu || !backdrop) {return;}
     const isOpen = menu.classList.contains('open');
     if (isOpen) {
         menu.classList.remove('open');

@@ -3,7 +3,7 @@ class SecurityUtils {
     
     // Sanitize HTML to prevent XSS attacks
     static sanitizeHTML(input) {
-        if (typeof input !== 'string') return input;
+        if (typeof input !== 'string') {return input;}
         
         // Create a temporary div to safely parse HTML
         const tempDiv = document.createElement('div');
@@ -13,7 +13,7 @@ class SecurityUtils {
     
     // Sanitize rich text content (preserves basic formatting)
     static sanitizeRichText(html) {
-        if (typeof html !== 'string') return html;
+        if (typeof html !== 'string') {return html;}
         
         // Allow only safe HTML tags for rich text
         const allowedTags = ['b', 'strong', 'i', 'em', 'u', 'br', 'p', 'ul', 'ol', 'li'];
@@ -49,8 +49,8 @@ class SecurityUtils {
     
     // Validate project title
     static validateTitle(title) {
-        if (typeof title !== 'string') return false;
-        if (title.length < 1 || title.length > 100) return false;
+        if (typeof title !== 'string') {return false;}
+        if (title.length < 1 || title.length > 100) {return false;}
         
         // Prevent dangerous characters
         const dangerousChars = /<script|javascript:|data:/i;
@@ -59,8 +59,8 @@ class SecurityUtils {
     
     // Validate project notes
     static validateNotes(notes) {
-        if (typeof notes !== 'string') return false;
-        if (notes.length > 50000) return false; // Limit note size
+        if (typeof notes !== 'string') {return false;}
+        if (notes.length > 50000) {return false;} // Limit note size
         
         // Check for excessive script tags
         const scriptCount = (notes.match(/<script/gi) || []).length;

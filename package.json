@@ -1,0 +1,55 @@
+{
+  "name": "nan-diary",
+  "version": "1.0.0",
+  "description": "A cozy diary app for creative project planning with Firebase integration",
+  "main": "dashboard.html",
+  "scripts": {
+    "dev": "npx live-server --port=3000 --open=dashboard.html",
+    "build": "npm run build:prepare && npm run build:copy",
+    "build:prepare": "echo '🏗️  Preparing build...'",
+    "build:copy": "copy dashboard.html deploy\\ && copy index.html deploy\\ && xcopy src deploy\\src /E /I /Y",
+    "deploy": "firebase deploy --only hosting",
+    "deploy:full": "firebase deploy",
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "lint": "eslint src/js/*.js --fix",
+    "lint:check": "eslint src/js/*.js",
+    "security-check": "npm audit --audit-level moderate",
+    "test": "echo '🧪 Tests coming soon...' && echo '✅ No tests configured yet' && exit 0",
+    "start": "npm run dev",
+    "clean": "if exist deploy\\*.html del deploy\\*.html && if exist deploy\\src rmdir /s /q deploy\\src",
+    "prebuild": "npm run clean",
+    "postbuild": "echo '✅ Build complete! Files ready in deploy/ directory'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nuwnian/nan-diary.git"
+  },
+  "keywords": [
+    "diary",
+    "creative",
+    "planning",
+    "firebase",
+    "pwa",
+    "responsive",
+    "security"
+  ],
+  "author": "nuwnian",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nuwnian/nan-diary/issues"
+  },
+  "homepage": "https://nan-diary-6cdba.web.app",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "firebase-tools": "^13.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": [
+    "defaults",
+    "not ie 11",
+    "not op_mini all"
+  ]
+}
