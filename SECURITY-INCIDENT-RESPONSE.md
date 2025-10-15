@@ -9,7 +9,7 @@
 ## 🚨 IMMEDIATE ACTIONS COMPLETED
 
 ### ✅ 1. Code Remediation (COMPLETED)
-- Removed API key `AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs` from all files
+- Removed API key `[REDACTED]` from all files
 - Updated `.gitignore` to prevent future exposure
 - Implemented secure configuration system
 - Committed security fixes to repository
@@ -20,7 +20,7 @@
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Select your project: `nan-diary-6cdba`
 3. Navigate to: **APIs & Services → Credentials**
-4. Find: `AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs`
+4. Find: `[THE EXPOSED API KEY]`
 5. **DELETE or REGENERATE this key immediately**
 
 ### ✅ 3. Generate New API Key
@@ -80,7 +80,7 @@ firebase-debug.log
 ## 📋 VERIFICATION CHECKLIST
 
 ### ☐ **CRITICAL - Revoke Old Key**
-- [ ] Old API key `AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs` deleted/revoked
+- [ ] Old API key `[REDACTED]` deleted/revoked
 - [ ] New API key generated with proper restrictions
 
 ### ☐ **Configure New Key**

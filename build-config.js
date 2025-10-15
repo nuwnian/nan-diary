@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const CONFIG_TEMPLATE = {
-    apiKey: process.env.FIREBASE_API_KEY || 'REPLACE_WITH_YOUR_NEW_API_KEY',
+    apiKey: process.env.FIREBASE_API_KEY || 'PLACEHOLDER_WILL_BE_REPLACED_IN_BUILD',
     authDomain: 'nan-diary-6cdba.firebaseapp.com',
     projectId: 'nan-diary-6cdba',
     storageBucket: 'nan-diary-6cdba.firebasestorage.app',
@@ -29,6 +29,7 @@ function replaceConfigInFile(filePath) {
     content = content.replace(configRegex, newConfig);
     
     // Replace placeholder API key if found
+    content = content.replace(/["']PLACEHOLDER_WILL_BE_REPLACED_IN_BUILD["']/g, `"${CONFIG_TEMPLATE.apiKey}"`);
     content = content.replace(/["']REPLACE_WITH_YOUR_NEW_API_KEY["']/g, `"${CONFIG_TEMPLATE.apiKey}"`);
     
     fs.writeFileSync(filePath, content);
@@ -49,7 +50,7 @@ function main() {
         replaceConfigInFile(file);
     });
     
-    if (CONFIG_TEMPLATE.apiKey === 'REPLACE_WITH_YOUR_NEW_API_KEY') {
+    if (CONFIG_TEMPLATE.apiKey === 'PLACEHOLDER_WILL_BE_REPLACED_IN_BUILD') {
         console.log('⚠️  WARNING: FIREBASE_API_KEY environment variable not set!');
         console.log('   Production build will not work without a valid API key.');
     } else {
