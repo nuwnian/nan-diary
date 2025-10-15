@@ -7,7 +7,7 @@
     "dev": "npx live-server --port=3000 --open=dashboard.html",
     "build": "npm run build:prepare && npm run build:copy && npm run build:config",
     "build:prepare": "echo '🏗️  Preparing build...'",
-    "build:copy": "copy dashboard.html deploy\\ && copy index.html deploy\\ && xcopy src deploy\\src /E /I /Y",
+    "build:copy": "node copy.js",
     "build:config": "node build-config.js",
     "deploy": "firebase deploy --only hosting",
     "deploy:full": "firebase deploy",
@@ -17,7 +17,7 @@
     "security-check": "npm audit --audit-level moderate",
     "test": "echo '🧪 Tests coming soon...' && echo '✅ No tests configured yet' && exit 0",
     "start": "npm run dev",
-    "clean": "if exist deploy\\*.html del deploy\\*.html && if exist deploy\\src rmdir /s /q deploy\\src",
+    "clean": "node clean.js",
     "prebuild": "npm run clean",
     "postbuild": "echo '✅ Build complete! Files ready in deploy/ directory'"
   },

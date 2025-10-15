@@ -2,7 +2,7 @@
 // Note: API keys for Firebase web clients are safe to expose publicly
 // The security comes from Firestore security rules and Firebase Auth
 const firebaseConfig = {
-    "apiKey": "PLACEHOLDER_WILL_BE_REPLACED_IN_BUILD",
+    "apiKey": "AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs",
     "authDomain": "nan-diary-6cdba.firebaseapp.com",
     "projectId": "nan-diary-6cdba",
     "storageBucket": "nan-diary-6cdba.firebasestorage.app",
