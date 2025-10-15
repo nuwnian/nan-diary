@@ -5,9 +5,10 @@
   "main": "dashboard.html",
   "scripts": {
     "dev": "npx live-server --port=3000 --open=dashboard.html",
-    "build": "npm run build:prepare && npm run build:copy",
+    "build": "npm run build:prepare && npm run build:copy && npm run build:config",
     "build:prepare": "echo '🏗️  Preparing build...'",
     "build:copy": "copy dashboard.html deploy\\ && copy index.html deploy\\ && xcopy src deploy\\src /E /I /Y",
+    "build:config": "node build-config.js",
     "deploy": "firebase deploy --only hosting",
     "deploy:full": "firebase deploy",
     "deploy:rules": "firebase deploy --only firestore:rules",

@@ -89,6 +89,8 @@ jobs:
       
     - name: 🏗️ Build project
       run: npm run build
+      env:
+        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
         
     - name: 🔥 Deploy to Firebase Hosting
       run: firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}" --project ${{ env.FIREBASE_PROJECT_ID }}
