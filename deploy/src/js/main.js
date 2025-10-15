@@ -221,17 +221,17 @@ function buildEmojiPicker(index) {
     // builds a small emoji picker element
     const picker = document.createElement('div');
     picker.className = 'emoji-picker';
-    picker.addEventListener('click', (e) => e.stopPropagation());
+    picker.addEventListener('click', (evt) => evt.stopPropagation());
     const grid = document.createElement('div');
     grid.className = 'emoji-grid';
-    emojiOptions.forEach((e) => {
+    emojiOptions.forEach((emoji) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.textContent = e;
+        btn.textContent = emoji;
         btn.addEventListener('click', (ev) => {
             ev.stopPropagation();
             ev.preventDefault();
-            selectEmoji(index, e);
+            selectEmoji(index, emoji);
         });
         grid.appendChild(btn);
     });
@@ -327,12 +327,21 @@ function performDelete(index) {
     }
 }
 
+// Make functions available globally for HTML onclick handlers
+window.addNewProject = addNewProject;
+window.openDetail = openDetail;
+window.closeDetail = closeDetail;
+window.deleteProject = deleteProject;
+window.signInWithGoogle = signInWithGoogle;
+window.signOutUser = signOutUser;
+window.buildEmojiPicker = buildEmojiPicker;
+
 // hook up confirm modal buttons and event delegation
 document.addEventListener('DOMContentLoaded', () => {
     // Font size number input handler
     const fontSizeInput = document.getElementById('fontSizeInput');
     if (fontSizeInput && detailNotes) {
-        fontSizeInput.addEventListener('change', (e) => {
+        fontSizeInput.addEventListener('change', () => {
             const size = fontSizeInput.value;
             const sel = window.getSelection();
             if (sel && sel.rangeCount > 0) {
@@ -357,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Font size dropdown handler
     const fontSizeSelect = document.getElementById('fontSizeSelect');
     if (fontSizeSelect && detailNotes) {
-        fontSizeSelect.addEventListener('change', (e) => {
+        fontSizeSelect.addEventListener('change', () => {
             document.execCommand('fontSize', false, fontSizeSelect.value);
             detailNotes.focus();
         });
@@ -365,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('confirmCancel');
     const okBtn = document.getElementById('confirmOk');
     const confirmView = document.getElementById('confirmView');
-    const grid = document.getElementById('projectsGrid');
     
     // Confirm modal handlers
     if (cancelBtn) {
