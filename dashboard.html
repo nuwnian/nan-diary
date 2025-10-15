@@ -12,9 +12,14 @@
         import { getFirestore, doc, setDoc, getDoc, collection } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
 
+        // Load environment configuration
+        // This will be replaced with actual API key during build
+        window.ENV = window.ENV || {};
+        window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY";
+
         // Your web app's Firebase configuration
         const firebaseConfig = {
-    "apiKey": "AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs",
+    "apiKey": window.ENV.FIREBASE_API_KEY,
     "authDomain": "nan-diary-6cdba.firebaseapp.com",
     "projectId": "nan-diary-6cdba",
     "storageBucket": "nan-diary-6cdba.firebasestorage.app",

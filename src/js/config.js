@@ -1,8 +1,8 @@
-// Secure Firebase configuration
+// Secure Firebase configuration using environment variables
 // Note: API keys for Firebase web clients are safe to expose publicly
 // The security comes from Firestore security rules and Firebase Auth
 const firebaseConfig = {
-    "apiKey": "AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs",
+    "apiKey": process.env.FIREBASE_API_KEY || "SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY",
     "authDomain": "nan-diary-6cdba.firebaseapp.com",
     "projectId": "nan-diary-6cdba",
     "storageBucket": "nan-diary-6cdba.firebasestorage.app",
