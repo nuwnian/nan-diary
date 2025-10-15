@@ -2,7 +2,7 @@
 // Note: API keys for Firebase web clients are safe to expose publicly
 // The security comes from Firestore security rules and Firebase Auth
 const firebaseConfig = {
-    apiKey: 'AIzaSyCanp6ClKoo2YSuYlbcUmITYRPdtu6Myrs',
+    apiKey: process.env.FIREBASE_API_KEY || 'REPLACE_WITH_YOUR_NEW_API_KEY',
     authDomain: 'nan-diary-6cdba.firebaseapp.com', 
     projectId: 'nan-diary-6cdba',
     storageBucket: 'nan-diary-6cdba.firebasestorage.app',

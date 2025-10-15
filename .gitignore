@@ -5,5 +5,17 @@ node_modules/
 npm-debug.log*
 *.log
 
+# Environment variables and secrets
+.env
+.env.local
+.env.production
+.env.development
+*.key
+*.pem
+
+# Firebase
+.firebase/
+firebase-debug.log
+
 # build
 dist/
