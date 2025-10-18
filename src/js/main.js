@@ -365,6 +365,7 @@ window.deleteProject = deleteProject;
 window.signInWithGoogle = signInWithGoogle;
 window.signOutUser = signOutUser;
 window.buildEmojiPicker = buildEmojiPicker;
+window.saveCurrentProject = saveCurrentProject;
 
 // hook up confirm modal buttons and event delegation
 document.addEventListener('DOMContentLoaded', () => {
@@ -474,6 +475,42 @@ document.addEventListener('DOMContentLoaded', () => {
         detailNotes.addEventListener('mouseup', updateToolbarState);
         detailNotes.addEventListener('focus', updateToolbarState);
         detailNotes.addEventListener('blur', updateToolbarState);
+        
+        // Auto-save functionality: save notes as user types (with debouncing)
+        let saveTimeout = null;
+        const autoSaveNotes = () => {
+            if (currentProjectIndex !== null && currentProjectIndex >= 0 && currentProjectIndex < projects.length) {
+                // Save the current content
+                const currentTitle = document.getElementById('detailTitle').value;
+                const currentNotes = detailNotes.innerHTML;
+                
+                projects[currentProjectIndex].title = currentTitle;
+                projects[currentProjectIndex].notes = currentNotes;
+                
+                // Update the main grid and save to cloud
+                renderProjects();
+                saveProjectsToCloud();
+                
+                console.log('Auto-saved notes for project:', projects[currentProjectIndex].title);
+            }
+        };
+        
+        const debouncedAutoSave = () => {
+            if (saveTimeout) {
+                clearTimeout(saveTimeout);
+            }
+            saveTimeout = setTimeout(autoSaveNotes, 1000); // Save 1 second after user stops typing
+        };
+        
+        // Add auto-save listeners
+        detailNotes.addEventListener('input', debouncedAutoSave);
+        detailNotes.addEventListener('paste', debouncedAutoSave);
+        
+        // Also auto-save when title changes
+        const detailTitle = document.getElementById('detailTitle');
+        if (detailTitle) {
+            detailTitle.addEventListener('input', debouncedAutoSave);
+        }
     }
 });
 
@@ -492,13 +529,25 @@ function openDetail(index) {
     }
 }
 
-function closeDetail() {
-    if (currentProjectIndex !== null) {
-        projects[currentProjectIndex].title = document.getElementById('detailTitle').value;
-        projects[currentProjectIndex].notes = document.getElementById('detailNotes').innerHTML;
-        renderProjects();
-        saveProjectsToCloud(); // Save to cloud when closing detail (saves title and notes changes)
+function saveCurrentProject() {
+    if (currentProjectIndex !== null && currentProjectIndex >= 0 && currentProjectIndex < projects.length) {
+        const titleElement = document.getElementById('detailTitle');
+        const notesElement = document.getElementById('detailNotes');
+        
+        if (titleElement && notesElement) {
+            projects[currentProjectIndex].title = titleElement.value;
+            projects[currentProjectIndex].notes = notesElement.innerHTML;
+            renderProjects();
+            saveProjectsToCloud();
+            console.log('Manually saved project:', projects[currentProjectIndex].title);
+        }
     }
+}
+
+function closeDetail() {
+    // Always save before closing
+    saveCurrentProject();
+    
     document.getElementById('detailView').style.display = 'none';
     document.body.style.overflow = 'auto';
     currentProjectIndex = null;
@@ -529,6 +578,37 @@ document.getElementById('searchBar').addEventListener('input', (e) => {
 document.getElementById('detailView').addEventListener('click', (e) => {
     if (e.target.id === 'detailView') {
         closeDetail();
+    }
+});
+
+// Add keyboard shortcut for saving (Ctrl+S or Cmd+S)
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault(); // Prevent browser's save dialog
+        if (currentProjectIndex !== null) {
+            saveCurrentProject();
+            // Show a brief save indicator
+            const indicator = document.createElement('div');
+            indicator.textContent = '💾 Saved!';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 4px;
+                z-index: 10000;
+                font-size: 14px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            `;
+            document.body.appendChild(indicator);
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
+                }
+            }, 2000);
+        }
     }
 });
 
