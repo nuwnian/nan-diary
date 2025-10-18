@@ -15,7 +15,7 @@
         // Load environment configuration
         // This will be replaced with actual API key during build
         window.ENV = window.ENV || {};
-        window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY";
+        window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -147,10 +147,10 @@
     
     <script type="module">
         // Import security utilities
-        import SecurityUtils from './src/js/security.js';
+        import SecurityUtils from './src/js/security.js?v=5';
         // Make SecurityUtils available globally for main.js
         window.SecurityUtils = SecurityUtils;
     </script>
-    <script src="src/js/main.js?v=4"></script>
+    <script src="src/js/main.js?v=5"></script>
 </body>
 </html>

@@ -30,6 +30,13 @@ async function signInWithGoogle() {
         console.log('Signed in successfully');
     } catch (error) {
         console.error('Sign in failed:', error);
+        
+        // Handle popup closed by user - don't show error for this
+        if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+            console.log('Sign-in popup was closed by user');
+            return;
+        }
+        
         // Helpful guidance for common Firebase auth error when domain not authorized
         try {
             const code = error && error.code ? error.code : '';
@@ -39,6 +46,9 @@ async function signInWithGoogle() {
                 // Show an alert to the user and log a console link for advanced users
                 alert(msg);
                 console.info('Open Firebase Console -> Authentication -> Settings and add the domain above.');
+            } else if (code !== 'auth/internal-error') {
+                // Show error for other cases (except internal errors which are usually transient)
+                alert('Sign-in failed: ' + (error.message || 'Unknown error'));
             }
         } catch (e) {
             // ignore secondary errors while reporting
@@ -139,7 +149,11 @@ async function loadProjectsFromCloud() {
 }
 
 async function saveProjectsToCloud() {
-    if (!userId || !isFirebaseReady) {return;}
+    // Silently skip if not signed in or Firebase not ready
+    if (!userId || !isFirebaseReady) {
+        console.log('Skipping cloud save: User not signed in or Firebase not ready');
+        return;
+    }
     
     try {
         // Validate user session
@@ -178,14 +192,30 @@ async function saveProjectsToCloud() {
         console.log('Projects saved to cloud');
     } catch (error) {
         console.error('Error saving to cloud:', error);
+        console.error('Error details:', error.message, error.code);
         
-        // Show user-friendly error message
-        if (error.message.includes('Rate limit')) {
+        // Show user-friendly error message based on error type
+        if (error.message.includes('Session expired') || error.message.includes('not authenticated')) {
+            // Authentication error - show a helpful message with option to sign in
+            const shouldSignIn = confirm('Your session has expired. Sign in again to save your changes to the cloud?\n\nClick OK to sign in, or Cancel to continue working offline.');
+            if (shouldSignIn) {
+                signInWithGoogle();
+            }
+        } else if (error.message.includes('Rate limit')) {
             alert('You are saving too frequently. Please wait a moment before saving again.');
         } else if (error.message.includes('Invalid')) {
             alert('Please check your project content. Some content may contain unsafe characters.');
+        } else if (error.message.includes('Missing or insufficient permissions')) {
+            // Firestore permission error
+            alert('You don\'t have permission to save to the cloud. Please sign in first.');
         } else {
-            alert('Failed to save your projects. Please try again.');
+            // For other errors, show detailed error in console but friendly message to user
+            console.warn('Failed to save to cloud, but your changes are saved locally.');
+            console.warn('Error reason:', error.message);
+            // Only show alert for critical errors that need user attention
+            if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
+                alert('Please sign in to save your changes to the cloud.');
+            }
         }
     }
 }
@@ -338,6 +368,8 @@ window.buildEmojiPicker = buildEmojiPicker;
 
 // hook up confirm modal buttons and event delegation
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize detailNotes at the top so it's available for all handlers
+    const detailNotes = document.getElementById('detailNotes');
     // Font size number input handler
     const fontSizeInput = document.getElementById('fontSizeInput');
     if (fontSizeInput && detailNotes) {
@@ -406,7 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Rich text toolbar handlers
     const boldBtn = document.getElementById('boldBtn');
     const bulletBtn = document.getElementById('bulletBtn');
-    const detailNotes = document.getElementById('detailNotes');
     function updateToolbarState() {
         if (!detailNotes) {return;}
         // Bold button
