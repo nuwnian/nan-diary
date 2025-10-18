@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Reject commits that include .env.local or obvious API key patterns
+if git diff --cached --name-only | grep -q "\.env.local\|AIzaSy"; then
+  echo "Error: Attempt to commit .env.local or API key detected. Please remove secrets before committing."
+  exit 1
+fi
+exit 0
