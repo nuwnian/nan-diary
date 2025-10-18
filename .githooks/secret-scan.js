@@ -24,10 +24,22 @@ try {
   // ignore
 }
 
-const files = process.argv.slice(2);
+let files = process.argv.slice(2);
 if (files.length === 0) {
-  console.error('No files supplied to secret-scan.js');
-  process.exit(0);
+  // No files specified — run the gitleaks wrapper for a thorough scan
+  try {
+    const spawn = require('child_process').spawnSync;
+    const res = spawn('node', [path.join(process.cwd(), 'gitleaks-wrapper.js')], {encoding: 'utf8'});
+    if (res.status !== 0) {
+      console.error(res.stdout || res.stderr);
+      process.exit(res.status || 1);
+    }
+    console.log(res.stdout || 'gitleaks wrapper completed');
+    process.exit(0);
+  } catch (e) {
+    console.error('Failed to run gitleaks wrapper', e);
+    process.exit(2);
+  }
 }
 
 files.forEach(f => {

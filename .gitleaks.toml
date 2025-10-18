@@ -1,0 +1,14 @@
+# gitleaks configuration for nan-diary
+# This file is intentionally minimal. We rely on the whitelist file `.secrets-whitelist`
+# for allowable placeholders. You can extend this config to fine-tune rules.
+
+[rules]
+# add custom rules if needed
+title = "gitleaks config"
+
+[allowlist]
+# literal values to ignore (exact match)
+allowlist = ["YOUR_API_KEY_HERE"]
+
+[rules]
+# add/override rules here if needed
