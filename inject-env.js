@@ -30,6 +30,13 @@ files.forEach(filePath => {
     
     // Replace placeholder with actual API key
     content = content.replace(/YOUR_API_KEY_HERE/g, API_KEY);
+
+    // Replace window.ENV assignment patterns like:
+    // window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "...";
+    content = content.replace(/window\.ENV\.FIREBASE_API_KEY\s*=\s*window\.ENV\.FIREBASE_API_KEY\s*\|\|\s*["'][^"']*["']/g, `window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "${API_KEY}"`);
+
+    // Replace JSON-style apiKey entries in firebaseConfig: "apiKey": "..."
+    content = content.replace(/("apiKey"\s*:\s*")[^"]*(")/g, `$1${API_KEY}$2`);
     
     fs.writeFileSync(fullPath, content, 'utf8');
     console.log(`✅ Injected API key into ${filePath}`);

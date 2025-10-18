@@ -33,7 +33,7 @@ This guide uses placeholder values (`YOUR_API_KEY_HERE`) instead of showing real
 After clearing cache, open DevTools Console (F12) and check:
 - You should see: "Firebase is ready, setting up auth listener"
 - You should NOT see any 403 errors
-- You should NOT see: `AIzaSyB2tr6APSGITNF1aVY-Qu3ULTI56ngQfjE`
+- You should NOT see: 
 
 ## ⚠️ If Still Not Working:
 
