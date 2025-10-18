@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const patterns = [
-  {name: 'Google API Key', re: /AIzaSy[0-9A-Za-z_-]{35}/gi},
+  {name: 'Google API Key', re: /AIzaSy[0-9A-Za-z_-]{33}/gi},
   {name: 'AWS Access Key', re: /AKIA[0-9A-Z]{16}/gi},
   {name: 'Slack token', re: /xox[baprs]-[0-9A-Za-z-]{10,}/gi},
   {name: 'Private Key', re: /-----BEGIN (RSA|PRIVATE) KEY-----/gi}
@@ -48,8 +48,12 @@ files.forEach(f => {
   if (stat.isDirectory()) return;
   let content;
   try { content = fs.readFileSync(f, 'utf8'); } catch (e) { return; }
-  // Normalize unicode and remove backticks to avoid markdown wrapping hiding matches
-  const normalized = content.normalize('NFKC').replace(/`/g, '');
+  // Remove BOM, control characters, and normalize unicode
+  const normalized = content
+    .replace(/^\uFEFF/, '')                             // Remove UTF-8 BOM
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')  // Remove control characters except \n and \r
+    .normalize('NFKC')                                  // Normalize unicode
+    .replace(/`/g, '');                                 // Remove backticks
   const lines = normalized.split(/\r?\n/);
   patterns.forEach(p => {
     lines.forEach((line, idx) => {
