@@ -6,13 +6,23 @@ const fs = require('fs');
 const path = require('path');
 
 const patterns = [
-  {name: 'Google API Key', re: /AIzaSy[0-9A-Za-z_-]{35}/g},
-  {name: 'AWS Access Key', re: /AKIA[0-9A-Z]{16}/g},
-  {name: 'Slack token', re: /xox[baprs]-[0-9A-Za-z-]{10,}/g},
-  {name: 'Private Key', re: /-----BEGIN (RSA|PRIVATE) KEY-----/g}
+  {name: 'Google API Key', re: /AIzaSy[0-9A-Za-z_-]{35}/gi},
+  {name: 'AWS Access Key', re: /AKIA[0-9A-Z]{16}/gi},
+  {name: 'Slack token', re: /xox[baprs]-[0-9A-Za-z-]{10,}/gi},
+  {name: 'Private Key', re: /-----BEGIN (RSA|PRIVATE) KEY-----/gi}
 ];
 
 let found = [];
+// Load whitelist (if present)
+let whitelist = [];
+try {
+  const wlPath = path.join(process.cwd(), '.secrets-whitelist');
+  if (fs.existsSync(wlPath)) {
+    whitelist = fs.readFileSync(wlPath, 'utf8').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  }
+} catch (e) {
+  // ignore
+}
 
 const files = process.argv.slice(2);
 if (files.length === 0) {
@@ -26,16 +36,27 @@ files.forEach(f => {
   if (stat.isDirectory()) return;
   let content;
   try { content = fs.readFileSync(f, 'utf8'); } catch (e) { return; }
+  // Normalize unicode and remove backticks to avoid markdown wrapping hiding matches
+  const normalized = content.normalize('NFKC').replace(/`/g, '');
+  const lines = normalized.split(/\r?\n/);
   patterns.forEach(p => {
-    if (content.match(p.re)) {
-      found.push({file: f, pattern: p.name});
-    }
+    lines.forEach((line, idx) => {
+      const m = line.match(p.re);
+      if (m) {
+        m.forEach(matchText => {
+          // Ignore if match exactly equals a whitelist entry
+          if (!whitelist.includes(matchText)) {
+            found.push({file: f, pattern: p.name, line: idx+1, match: matchText});
+          }
+        });
+      }
+    });
   })
 });
 
 if (found.length > 0) {
   console.error('\nSecret patterns detected:');
-  found.forEach(x => console.error(` - ${x.pattern} in ${x.file}`));
+  found.forEach(x => console.error(` - ${x.pattern} in ${x.file}:${x.line} => ${x.match}`));
   console.error('\nPush blocked. Remove secrets or add to .gitignore before pushing.');
   process.exit(2);
 }
