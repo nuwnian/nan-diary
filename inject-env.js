@@ -14,8 +14,9 @@ if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE' || API_KEY === 'PLACEHOLDER_FOR_
 
 // Files to process
 const files = [
-    'dashboard.html',
-    'deploy/dashboard.html'
+    'dashboard.html'
+    // Note: deploy/dashboard.html should only be modified at deployment time
+    // to prevent committing real API keys to the repository
 ];
 
 files.forEach(filePath => {
@@ -30,6 +31,7 @@ files.forEach(filePath => {
     
     // Replace placeholder with actual API key
     content = content.replace(/YOUR_API_KEY_HERE/g, API_KEY);
+    content = content.replace(/PLACEHOLDER_FOR_BUILD_INJECTION/g, API_KEY);
 
     // Replace window.ENV assignment patterns like:
     // window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "...";

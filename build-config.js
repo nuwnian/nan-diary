@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const CONFIG_TEMPLATE = {
-    apiKey: process.env.FIREBASE_API_KEY || 'SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY',
+    apiKey: 'window.ENV.FIREBASE_API_KEY', // This placeholder will reference the injected value
     authDomain: 'nan-diary-6cdba.firebaseapp.com',
     projectId: 'nan-diary-6cdba',
     storageBucket: 'nan-diary-6cdba.firebasestorage.app',
