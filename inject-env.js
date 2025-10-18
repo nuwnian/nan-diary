@@ -1,4 +1,5 @@
-// Script to inject environment variables into HTML files before deployment
+// Script to inject environment variables into source files for LOCAL DEVELOPMENT ONLY
+// This should NOT be used for deployment - use deploy-inject.js instead
 const fs = require('fs');
 const path = require('path');
 
@@ -12,11 +13,15 @@ if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE' || API_KEY === 'PLACEHOLDER_FOR_
     process.exit(1);
 }
 
-// Files to process
+console.log('⚠️  WARNING: This script modifies SOURCE files for development.');
+console.log('⚠️  Make sure to revert source files to placeholders before committing!');
+console.log('⚠️  Use deploy-inject.js for production deployment.\n');
+
+// Files to process for LOCAL DEVELOPMENT ONLY
 const files = [
     'dashboard.html'
-    // Note: deploy/dashboard.html should only be modified at deployment time
-    // to prevent committing real API keys to the repository
+    // Note: Source files should be reverted to placeholders before git commit
+    // Only deploy/ files should contain real API keys (and deploy/ is gitignored)
 ];
 
 files.forEach(filePath => {
@@ -41,7 +46,9 @@ files.forEach(filePath => {
     content = content.replace(/("apiKey"\s*:\s*")[^"]*(")/g, `$1${API_KEY}$2`);
     
     fs.writeFileSync(fullPath, content, 'utf8');
-    console.log(`✅ Injected API key into ${filePath}`);
+    console.log(`✅ Injected API key into ${filePath} (LOCAL DEV)`);
 });
 
-console.log('\n🎉 Environment variables injected successfully!');
+console.log('\n🎉 Environment variables injected for LOCAL DEVELOPMENT!');
+console.log('⚠️  Remember: Revert source files to placeholders before git commit!');
+console.log('💡 Use "git checkout dashboard.html" to revert if needed.');

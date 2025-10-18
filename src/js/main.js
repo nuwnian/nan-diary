@@ -20,16 +20,56 @@ function waitForFirebase() {
     });
 }
 
+// Detect mobile device for auth method selection
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+           || window.innerWidth <= 768;
+}
+
 async function signInWithGoogle() {
     await waitForFirebase();
     const provider = new window.GoogleAuthProvider();
+    const isMobile = isMobileDevice();
+    
     try {
-        const result = await window.signInWithPopup(window.firebaseAuth, provider);
-        userId = result.user.uid;
-        loadProjectsFromCloud();
-        console.log('Signed in successfully');
+        // Show loading state
+        const signInBtn = document.getElementById('signInBtn');
+        const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+        if (signInBtn) signInBtn.textContent = 'Signing in...';
+        if (mobileSignInBtn) mobileSignInBtn.textContent = 'Signing in...';
+        
+        if (isMobile) {
+            // Mobile: use redirect (better UX, avoids popup blockers)
+            console.log('Using mobile redirect authentication');
+            await window.signInWithRedirect(window.firebaseAuth, provider);
+            // Redirect will handle the rest - no code after this executes
+        } else {
+            // Desktop: use popup
+            console.log('Using desktop popup authentication');
+            const result = await window.signInWithPopup(window.firebaseAuth, provider);
+            userId = result.user.uid;
+            loadProjectsFromCloud();
+            console.log('Signed in successfully');
+        }
     } catch (error) {
         console.error('Sign in failed:', error);
+        
+        // Reset button states
+        const signInBtn = document.getElementById('signInBtn');
+        const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+        if (signInBtn) signInBtn.textContent = 'Sign In';
+        if (mobileSignInBtn) mobileSignInBtn.textContent = 'Sign In';
+        
+        // Handle mobile-specific errors
+        if (isMobile && error.code === 'auth/popup-blocked') {
+            console.log('Popup blocked on mobile, attempting redirect...');
+            try {
+                await window.signInWithRedirect(window.firebaseAuth, provider);
+                return;
+            } catch (redirectError) {
+                console.error('Redirect also failed:', redirectError);
+            }
+        }
         
         // Handle popup closed by user - don't show error for this
         if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
@@ -46,9 +86,14 @@ async function signInWithGoogle() {
                 // Show an alert to the user and log a console link for advanced users
                 alert(msg);
                 console.info('Open Firebase Console -> Authentication -> Settings and add the domain above.');
+            } else if (code === 'auth/network-request-failed' && isMobile) {
+                alert('Network error. Please check your mobile connection and try again.');
             } else if (code !== 'auth/internal-error') {
                 // Show error for other cases (except internal errors which are usually transient)
-                alert('Sign-in failed: ' + (error.message || 'Unknown error'));
+                const errorMsg = isMobile ? 
+                    'Mobile sign-in failed: ' + (error.message || 'Unknown error') :
+                    'Sign-in failed: ' + (error.message || 'Unknown error');
+                alert(errorMsg);
             }
         } catch (e) {
             // ignore secondary errors while reporting
@@ -60,9 +105,56 @@ function signOutUser() {
     window.firebaseAuth.signOut();
 }
 
+// Handle mobile redirect authentication result
+async function handleMobileRedirectResult() {
+    const isMobile = isMobileDevice();
+    if (!isMobile) return; // Only process on mobile devices
+    
+    try {
+        console.log('Checking for mobile redirect result...');
+        const result = await window.getRedirectResult(window.firebaseAuth);
+        
+        if (result && result.user) {
+            console.log('Mobile redirect sign-in successful:', result.user.email);
+            userId = result.user.uid;
+            loadProjectsFromCloud();
+            
+            // Show success feedback
+            const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+            if (mobileSignInBtn) {
+                mobileSignInBtn.textContent = 'Welcome back!';
+                setTimeout(() => {
+                    // Auth state listener will update the button properly
+                }, 2000);
+            }
+        } else {
+            console.log('No redirect result found');
+        }
+    } catch (error) {
+        console.error('Mobile redirect result error:', error);
+        
+        // Reset mobile button if there was an error
+        const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+        if (mobileSignInBtn && mobileSignInBtn.textContent === 'Signing in...') {
+            mobileSignInBtn.textContent = 'Sign In';
+        }
+        
+        // Show user-friendly error for mobile
+        if (error.code === 'auth/network-request-failed') {
+            alert('Network error during sign-in. Please check your connection and try again.');
+        } else if (error.code !== 'auth/internal-error') {
+            alert('Mobile sign-in failed: ' + (error.message || 'Unknown error'));
+        }
+    }
+}
+
 // Initialize auth state listener when Firebase is ready
 waitForFirebase().then(() => {
     console.log('Firebase is ready, setting up auth listener');
+    
+    // Handle mobile redirect result if user returned from OAuth
+    handleMobileRedirectResult();
+    
     window.onAuthStateChanged(window.firebaseAuth, (user) => {
         console.log('Auth state changed. User:', user ? 'signed in' : 'signed out');
         const signInBtn = document.getElementById('signInBtn');

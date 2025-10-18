@@ -17,6 +17,15 @@ npm-debug.log*
 .firebase/
 firebase-debug.log
 
-# build
+# Build and deployment (contains real API keys)
 dist/
 deploy/
+
+# Mobile testing files (may contain API keys during testing)
+mobile-test.html
+
+# Temporary files with potential secrets
+*.tmp
+*.bak
+*-with-keys.html
+*-injected.html

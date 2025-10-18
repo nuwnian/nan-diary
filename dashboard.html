@@ -8,14 +8,14 @@
     <!-- Firebase JS SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, setDoc, getDoc, collection } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
 
         // Load environment configuration
         // This will be replaced with actual API key during build
         window.ENV = window.ENV || {};
-    window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "AIzaSyA6y8w135Pe306Sp1a6YRKL7lkFoUsRfpo";
+        window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "PLACEHOLDER_FOR_BUILD_INJECTION";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -39,6 +39,8 @@
         window.firebaseDb = db;
         window.GoogleAuthProvider = GoogleAuthProvider;
         window.signInWithPopup = signInWithPopup;
+        window.signInWithRedirect = signInWithRedirect;
+        window.getRedirectResult = getRedirectResult;
         window.onAuthStateChanged = onAuthStateChanged;
         window.doc = doc;
         window.setDoc = setDoc;
