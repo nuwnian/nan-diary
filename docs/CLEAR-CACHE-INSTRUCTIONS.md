@@ -1,8 +1,8 @@
 # 🔄 Clear Browser Cache - Fix API Key Issues
 
 ## Your Error:
-You're seeing the wrong API key (`AIzaSyB2tr6APSGITNF1aVY-Qu3ULTI56ngQfjE`) instead of your real key.
-This is because your browser has cached the old configuration.
+You're seeing an old API key value in the UI instead of your real key. This is usually caused by browser caching of an old `dashboard.html`.
+This guide uses placeholder values (`YOUR_API_KEY_HERE`) instead of showing real keys.
 
 ## ✅ How to Fix:
 
@@ -37,9 +37,9 @@ After clearing cache, open DevTools Console (F12) and check:
 
 ## ⚠️ If Still Not Working:
 
-1. **Check your .env.local file has the correct key:**
+1. **Check your `.env.local` file has the correct key:**
    ```
-   FIREBASE_API_KEY=AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ
+   FIREBASE_API_KEY=YOUR_API_KEY_HERE
    ```
 
 2. **Re-run the injection script:**
@@ -51,13 +51,12 @@ After clearing cache, open DevTools Console (F12) and check:
    node inject-env.js
    ```
 
-3. **Check dashboard.html has your correct key:**
+3. **Check `dashboard.html` has your correct key placeholder:**
    - Open `dashboard.html`
    - Search for `FIREBASE_API_KEY`
-   - Should show: `AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ`
+   - In the repository it should show the placeholder: `YOUR_API_KEY_HERE`. The real key is injected at dev/build time from `.env.local`.
 
 ## 🎯 Current Status:
-- ✅ Your correct API key: `AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ`
 - ✅ Script version updated to v=5 (forces new cache)
 - ✅ Injection script ready to use
 

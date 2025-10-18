@@ -55,7 +55,7 @@ Based on your console logs:
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Select your project: `nan-diary-6cdba`
 3. Go to **APIs & Services** → **Credentials**
-4. Find your API key: `AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ`
+4. Find your API key (do NOT paste the real key into the repo; use `.env.local`): `YOUR_API_KEY_HERE`
 5. Click on it to edit
 6. Under **Application restrictions**:
    - Choose "None" (for testing) OR
@@ -111,7 +111,7 @@ firebase deploy --only firestore:rules
 2. Check your Web App configuration matches:
    ```
    Project ID: nan-diary-6cdba
-   API Key: AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ
+   API Key: YOUR_API_KEY_HERE
    Auth Domain: nan-diary-6cdba.firebaseapp.com
    ```
 
@@ -135,12 +135,12 @@ firebase deploy --only firestore:rules
 
 ## 🧪 **Testing Steps:**
 
-### **Step 1: Verify API Key**
-```bash
-# In PowerShell, check your dashboard.html
-Get-Content dashboard.html | Select-String -Pattern "AIzaSy"
+### **Step 1: Verify API Key (local/dev)**
+```powershell
+# In PowerShell, check your dashboard.html shows the placeholder (real key is injected from .env.local at runtime)
+Get-Content dashboard.html | Select-String -Pattern "FIREBASE_API_KEY"
 ```
-Should show: `AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ`
+In the repository it should show the placeholder `YOUR_API_KEY_HERE`. The real key is stored in `.env.local` and injected for dev/build.
 
 ### **Step 2: Test in Clean Environment**
 1. Open **Incognito/Private window**
@@ -188,10 +188,9 @@ Try this diagnostic:
 
 ## 📋 **Current Status:**
 
-✅ Your API key: `AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ`  
-✅ Your project: `nan-diary-6cdba`  
-✅ Firestore rules: Properly configured  
-✅ Code: All fixes applied  
+- ✅ Your project: `nan-diary-6cdba`
+- ✅ Firestore rules: Properly configured
+- ✅ Code: All fixes applied
 
 **Most likely issue: Browser cache with old API key**  
 **Best solution: Use Incognito window to test**

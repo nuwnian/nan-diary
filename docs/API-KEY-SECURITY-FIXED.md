@@ -77,7 +77,7 @@ If you already committed and pushed your API key to GitHub:
 
 Your API key is safely stored in `.env.local`:
 ```
-FIREBASE_API_KEY=AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ
+FIREBASE_API_KEY=YOUR_API_KEY_HERE
 ```
 
 This file is in `.gitignore` and will never be committed.
