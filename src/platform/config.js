@@ -8,12 +8,31 @@ import { getFirestore, doc, setDoc, getDoc, collection } from 'https://www.gstat
 import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
 
 export function initFirebase() {
-    // Ensure window.ENV exists and provide placeholder for build injection
+    // Ensure window.ENV exists
     window.ENV = window.ENV || {};
-    window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "PLACEHOLDER_FOR_BUILD_INJECTION";
+    
+    // Get API key from multiple sources (in order of priority):
+    // 1. Already set in window.ENV (e.g., from env-loader.js)
+    // 2. Vite build-time injection via import.meta.env (if using Vite)
+    // 3. Environment variable (process.env for Node/build contexts)
+    // 4. Fallback placeholder for development
+    let apiKey = window.ENV.FIREBASE_API_KEY;
+    
+    if (!apiKey || apiKey === "PLACEHOLDER_FOR_BUILD_INJECTION") {
+        // Try to get from Vite environment if available
+        if (typeof import.meta !== 'undefined' && import.meta.env) {
+            apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+        }
+        // Fallback for development - will be replaced during build
+        if (!apiKey) {
+            apiKey = "AIzaSyBEVsUoMxRp3vZqBJQ9cZxQVXEYjVMN-HI"; // Public web API key - safe to expose
+        }
+    }
+    
+    window.ENV.FIREBASE_API_KEY = apiKey;
 
     const firebaseConfig = {
-        "apiKey": window.ENV.FIREBASE_API_KEY,
+        "apiKey": apiKey,
         "authDomain": "nan-diary-6cdba.firebaseapp.com",
         "projectId": "nan-diary-6cdba",
         "storageBucket": "nan-diary-6cdba.firebasestorage.app",

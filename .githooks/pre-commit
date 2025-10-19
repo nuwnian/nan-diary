@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 // Pre-commit hook to prevent secrets from being committed
 
-const { execSync } = require('child_process');
-const path = require('path');
+import { execSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 try {
   // Get staged files
@@ -16,8 +20,8 @@ try {
     process.exit(0);
   }
 
-  // Check for .env.local files
-  const envFiles = stagedFiles.filter(f => f.includes('.env.local'));
+  // Check for .env.local files (but allow .env.local.example)
+  const envFiles = stagedFiles.filter(f => f.endsWith('.env.local'));
   if (envFiles.length > 0) {
     console.error('\nError: Attempt to commit .env.local file detected:');
     envFiles.forEach(f => console.error(`  - ${f}`));

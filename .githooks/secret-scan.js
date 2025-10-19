@@ -5,9 +5,9 @@
 //  - Otherwise, fall back to regex-based scanning over staged file contents.
 // Usage: node .githooks/secret-scan.js <file1> <file2> ...
 
-const fs = require('fs');
-const path = require('path');
-const child = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import child from 'child_process';
 
 const patterns = [
   { name: 'Google API Key', re: /AIzaSy[0-9A-Za-z_-]{33}/g },
