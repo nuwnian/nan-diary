@@ -20,6 +20,7 @@ firebase-debug.log
 # Build and deployment (contains real API keys)
 dist/
 deploy/
+backend/
 
 # Mobile testing files (may contain API keys during testing)
 mobile-test.html
