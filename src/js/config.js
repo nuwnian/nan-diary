@@ -3,13 +3,13 @@
 // The security comes from Firestore security rules and Firebase Auth
 const firebaseConfig = {
     // For security, prefer loading from environment variable. If not set, fallback to hardcoded key (not recommended for production)
-    "apiKey": process.env.FIREBASE_API_KEY || "YOUR_API_KEY_HERE",
-    "authDomain": "nan-diary-6cdba.firebaseapp.com",
-    "projectId": "nan-diary-6cdba",
-    "storageBucket": "nan-diary-6cdba.firebasestorage.app",
-    "messagingSenderId": "709052515369",
-    "appId": "1:709052515369:web:0457058cd8b7d22010c838",
-    "measurementId": "G-KJZR72YVR8"
+    'apiKey': process.env.FIREBASE_API_KEY || 'YOUR_API_KEY_HERE',
+    'authDomain': 'nan-diary-6cdba.firebaseapp.com',
+    'projectId': 'nan-diary-6cdba',
+    'storageBucket': 'nan-diary-6cdba.firebasestorage.app',
+    'messagingSenderId': '709052515369',
+    'appId': '1:709052515369:web:0457058cd8b7d22010c838',
+    'measurementId': 'G-KJZR72YVR8'
 };
 
 // Additional security configurations

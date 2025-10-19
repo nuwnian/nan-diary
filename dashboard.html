@@ -17,7 +17,11 @@
         // Load environment configuration
         // This will be replaced with actual API key during build
         window.ENV = window.ENV || {};
-        window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "PLACEHOLDER_FOR_BUILD_INJECTION";
+    // Placeholder kept intentionally; real key must be injected at build/deploy time.
+    // Do NOT commit real API keys to the repository. The build system will replace this
+    // value from environment variables when creating production artifacts.
+    window.ENV.FIREBASE_API_KEY = window.ENV.FIREBASE_API_KEY || "FIREBASE_API_KEY_PLACEHOLDER";
+        window.ENV.API_BASE_URL = window.ENV.API_BASE_URL || "http://localhost:3001";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -140,6 +144,7 @@
         // Make SecurityUtils available globally for main.js
         window.SecurityUtils = SecurityUtils;
     </script>
+    <script src="src/js/apiClient.js?v=5"></script>
     <script src="src/js/main.js?v=5"></script>
 </body>
 </html>

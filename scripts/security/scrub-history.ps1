@@ -10,7 +10,8 @@ param(
     [string]$Secret,
 
     [string]$Replacement = 'REDACTED_KEY',
-    [string]$Remote = 'origin'
+    [string]$Remote = 'origin',
+    [switch]$AutoDelete  # If set, attempt to securely delete the replacements file after printing commands
 )
 
 $cwd = Get-Location
@@ -22,16 +23,23 @@ if (-not (Test-Path .git)) {
     exit 1
 }
 
-$replacementsFile = Join-Path $cwd "replacements.txt"
-"$Secret==>$Replacement" | Out-File -Encoding UTF8 -FilePath $replacementsFile
+try {
+    # Use OS temporary directory to avoid creating files in the repo root
+    $tempDir = [System.IO.Path]::GetTempPath()
+    $replacementsFile = Join-Path $tempDir "replacements.txt"
+    "$Secret==>$Replacement" | Out-File -Encoding UTF8 -FilePath $replacementsFile -Force
 
-Write-Host "Created replacements file at: $replacementsFile"
-Write-Host "Contents:"
-Get-Content $replacementsFile | ForEach-Object { Write-Host "  $_" }
+    Write-Host "Created replacements file at (temp): $replacementsFile"
+    Write-Host "Contents:"
+    Get-Content $replacementsFile | ForEach-Object { Write-Host "  $_" }
 
-# SECURITY NOTE: 'replacements.txt' contains the secret in plaintext. Keep it secret.
-Write-Host "\nNOTE: 'replacements.txt' contains the secret in plaintext. Do not commit it to git." -ForegroundColor Yellow
-Write-Host "You can add it to .gitignore temporarily (example):`n  echo 'replacements.txt' >> .gitignore`n"
+    # SECURITY NOTE: the replacements file contains the secret in plaintext. Keep it secret.
+    Write-Host "\nNOTE: the replacements file contains the secret in plaintext and was written to the OS temp directory." -ForegroundColor Yellow
+    Write-Host "This file will not be created inside the repository root. If you prefer a repo-local file, re-run without -AutoDelete and copy it manually."
+} catch {
+    Write-Host "Failed to write replacements file to temp: $_" -ForegroundColor Red
+    exit 3
+}
 
 Write-Host "
 SAFE MODE: This script will only print the commands you should run next. It will NOT run them.
@@ -82,3 +90,24 @@ Write-Host "Recommended commands to execute:"
 foreach ($c in $cmds) { Write-Host "  $c" }
 
 Write-Host "`nWhen you're ready and have reviewed the backup, run those commands manually in PowerShell." 
+
+# If requested, attempt to securely delete the replacements file from the temp directory.
+if ($AutoDelete.IsPresent) {
+    Write-Host "\nAutoDelete requested: attempting to securely delete the replacements file from temp." -ForegroundColor Yellow
+    try {
+        # Best-effort secure delete: overwrite the file with random data then remove it.
+        $fileInfo = Get-Item -Path $replacementsFile -ErrorAction Stop
+        $size = $fileInfo.Length
+        if ($size -gt 0) {
+            $rand = New-Object System.Random
+            $bytes = New-Object byte[] $size
+            $rand.NextBytes($bytes)
+            [System.IO.File]::WriteAllBytes($replacementsFile, $bytes)
+        }
+        Remove-Item -Path $replacementsFile -Force -ErrorAction Stop
+        Write-Host "Replacements file securely overwritten and deleted: $replacementsFile" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to securely delete the replacements file: $_" -ForegroundColor Yellow
+        Write-Host "You may need to remove it manually: Remove-Item -Path '$replacementsFile' -Force" -ForegroundColor Yellow
+    }
+}

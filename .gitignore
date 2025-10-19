@@ -25,7 +25,11 @@ deploy/
 mobile-test.html
 
 # Temporary files with potential secrets
+# Temporary files with potential secrets
 *.tmp
 *.bak
 *-with-keys.html
 *-injected.html
+
+# Replacement file produced by scripts/scrub-history.ps1 (may contain plaintext secrets)
+replacements.txt

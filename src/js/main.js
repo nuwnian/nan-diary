@@ -34,8 +34,8 @@ async function signInWithGoogle() {
         // Show loading state
         const signInBtn = document.getElementById('signInBtn');
         const mobileSignInBtn = document.getElementById('mobileSignInBtn');
-        if (signInBtn) signInBtn.textContent = 'Signing in...';
-        if (mobileSignInBtn) mobileSignInBtn.textContent = 'Signing in...';
+        if (signInBtn) {signInBtn.textContent = 'Signing in...';}
+        if (mobileSignInBtn) {mobileSignInBtn.textContent = 'Signing in...';}
         
         if (isMobile) {
             // Mobile: use redirect (better UX, avoids popup blockers)
@@ -56,7 +56,15 @@ async function signInWithGoogle() {
             } else {
                 result = await window.signInWithPopup(window.firebaseAuth, new window.GoogleAuthProvider());
             }
-            userId = result.user.uid;
+            
+            // Get ID token and store in API client
+            const user = result.user;
+            const idToken = await user.getIdToken();
+            if (window.apiClient) {
+                window.apiClient.setToken(idToken);
+            }
+            
+            userId = user.uid;
             loadProjectsFromCloud();
             console.log('Signed in successfully');
         }
@@ -66,17 +74,18 @@ async function signInWithGoogle() {
         // Reset button states
         const signInBtn = document.getElementById('signInBtn');
         const mobileSignInBtn = document.getElementById('mobileSignInBtn');
-        if (signInBtn) signInBtn.textContent = 'Sign In';
-        if (mobileSignInBtn) mobileSignInBtn.textContent = 'Sign In';
+        if (signInBtn) {signInBtn.textContent = 'Sign In';}
+        if (mobileSignInBtn) {mobileSignInBtn.textContent = 'Sign In';}
         
-        // Handle mobile-specific errors
-        if (isMobile && error.code === 'auth/popup-blocked') {
-            console.log('Popup blocked on mobile, attempting redirect...');
+        // Handle popup blocked - try redirect instead
+        if (error.code === 'auth/popup-blocked') {
+            console.log('Popup blocked, attempting redirect instead...');
             try {
-                await window.signInWithRedirect(window.firebaseAuth, provider);
+                await window.signInWithRedirect(window.firebaseAuth, new window.GoogleAuthProvider());
                 return;
             } catch (redirectError) {
                 console.error('Redirect also failed:', redirectError);
+                alert('Please allow popups for this site, or use the redirect sign-in option.');
             }
         }
         
@@ -116,11 +125,9 @@ function signOutUser() {
 
 // Handle mobile redirect authentication result
 async function handleMobileRedirectResult() {
-    const isMobile = isMobileDevice();
-    if (!isMobile) return; // Only process on mobile devices
-    
+    // Check for redirect results (works for both mobile and desktop)
     try {
-        console.log('Checking for mobile redirect result...');
+        console.log('Checking for redirect result...');
         let result;
         if (window.authService) {
             result = await window.authService.getRedirectResult();
@@ -129,18 +136,27 @@ async function handleMobileRedirectResult() {
         }
 
         if (result && result.user) {
-            console.log('Mobile redirect sign-in successful:', result.user.email);
+            console.log('Redirect sign-in successful:', result.user.email);
+            
+            // Get ID token and store in API client
+            const idToken = await result.user.getIdToken();
+            if (window.apiClient) {
+                window.apiClient.setToken(idToken);
+            }
+            
             userId = result.user.uid;
             loadProjectsFromCloud();
             
             // Show success feedback
+            const signInBtn = document.getElementById('signInBtn');
             const mobileSignInBtn = document.getElementById('mobileSignInBtn');
+            if (signInBtn) {
+                signInBtn.textContent = 'Welcome back!';
+            }
             if (mobileSignInBtn) {
                 mobileSignInBtn.textContent = 'Welcome back!';
-                setTimeout(() => {
-                    // Auth state listener will update the button properly
-                }, 2000);
             }
+            // Auth state listener will update the buttons properly
         } else {
             console.log('No redirect result found');
         }
@@ -169,7 +185,7 @@ waitForFirebase().then(() => {
     // Handle mobile redirect result if user returned from OAuth
     handleMobileRedirectResult();
     
-    const authListener = (user) => {
+    const authListener = async (user) => {
         console.log('Auth state changed. User:', user ? 'signed in' : 'signed out');
         const signInBtn = document.getElementById('signInBtn');
         const signOutBtn = document.getElementById('signOutBtn');
@@ -179,6 +195,12 @@ waitForFirebase().then(() => {
         console.log('Mobile sign in button found:', !!mobileSignInBtn, 'Mobile sign out button found:', !!mobileSignOutBtn);
         
         if (user) {
+            // Get ID token and store in API client
+            const idToken = await user.getIdToken();
+            if (window.apiClient) {
+                window.apiClient.setToken(idToken);
+            }
+            
             userId = user.uid;
             console.log('User signed in:', user.email);
             loadProjectsFromCloud();
@@ -208,6 +230,9 @@ waitForFirebase().then(() => {
             }
         } else {
             userId = null;
+            if (window.apiClient) {
+                window.apiClient.setToken(null);
+            }
             console.log('User signed out');
             
             // Update desktop buttons - Show active sign in button, hide sign out button
@@ -242,8 +267,33 @@ waitForFirebase().then(() => {
 });
 
 async function loadProjectsFromCloud() {
-    if (!userId || !isFirebaseReady) {return;}
+    if (!userId) {return;}
+    
     try {
+        // Try API client first if available
+        if (window.apiClient) {
+            try {
+                const response = await window.apiClient.getProjects();
+                
+                if (response.success && response.projects) {
+                    projects.length = 0;
+                    projects.push(...response.projects);
+                    renderProjects();
+                    console.log('Projects loaded from API');
+                    return; // Success, exit early
+                }
+            } catch (apiError) {
+                console.warn('API request failed, falling back to Firestore:', apiError.message);
+                // Fall through to Firestore fallback
+            }
+        }
+        
+        // Fallback to direct Firestore
+        if (!isFirebaseReady) {
+            console.log('Firebase not ready, skipping fallback');
+            return;
+        }
+        
         let data = [];
         if (window.notesService) {
             data = await window.notesService.loadProjects(userId);
@@ -258,86 +308,87 @@ async function loadProjectsFromCloud() {
             projects.length = 0;
             projects.push(...data);
             renderProjects();
-            console.log('Projects loaded from cloud');
+            console.log('Projects loaded from Firestore (fallback)');
+        } else {
+            console.log('No projects found');
         }
     } catch (error) {
-        console.error('Error loading from cloud:', error);
+        console.error('Error loading projects:', error);
+        // Don't alert for load errors, just log them
     }
 }
 
 async function saveProjectsToCloud() {
-    // Silently skip if not signed in or Firebase not ready
-    if (!userId || !isFirebaseReady) {
-        console.log('Skipping cloud save: User not signed in or Firebase not ready');
+    // Silently skip if not signed in
+    if (!userId) {
+        console.log('Skipping cloud save: User not signed in');
         return;
     }
     
     try {
-        // Validate user session
-        await window.SecurityUtils?.validateUserSession(window.firebaseAuth);
-        
-        // Rate limiting check
-        if (!window.SecurityUtils?.checkRateLimit(userId, 'save_projects', 20, 60000)) {
-            window.SecurityUtils?.logSecurityEvent('rate_limit_exceeded', { action: 'save_projects', userId });
-            throw new Error('Rate limit exceeded. Please try again later.');
+        // Try API client first if available
+        if (window.apiClient) {
+            try {
+                const response = await window.apiClient.saveProjects(projects);
+                
+                if (response.success) {
+                    console.log('Projects saved to API');
+                    return; // Success, exit early
+                }
+            } catch (apiError) {
+                console.warn('API save failed, falling back to Firestore:', apiError.message);
+                // Fall through to Firestore fallback
+            }
         }
         
-        // Validate and sanitize all projects before saving
-        const sanitizedProjects = projects.map(project => {
-            // Validate title
-            if (!window.SecurityUtils?.validateTitle(project.title)) {
-                window.SecurityUtils?.logSecurityEvent('invalid_title', { title: project.title, userId });
-                throw new Error('Invalid project title detected');
-            }
-            
-            // Validate notes  
-            if (!window.SecurityUtils?.validateNotes(project.notes || '')) {
-                window.SecurityUtils?.logSecurityEvent('invalid_notes', { userId });
-                throw new Error('Invalid project notes detected');
-            }
-            
-            return {
-                title: window.SecurityUtils?.sanitizeHTML(project.title) || project.title,
-                notes: window.SecurityUtils?.sanitizeRichText(project.notes || '') || project.notes,
-                emoji: project.emoji, // Emojis are safe
-                date: project.date
-            };
-        });
-        
-        if (window.notesService) {
-            await window.notesService.saveProjects(userId, sanitizedProjects);
-        } else {
-            const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
-            await window.setDoc(docRef, { projects: sanitizedProjects });
+        // Fallback to direct Firestore
+        if (!isFirebaseReady) {
+            console.log('Skipping cloud save: Firebase not ready');
+            return;
         }
-        console.log('Projects saved to cloud');
+            
+            // Validate user session
+            await window.SecurityUtils?.validateUserSession(window.firebaseAuth);
+            
+            // Rate limiting check
+            if (!window.SecurityUtils?.checkRateLimit(userId, 'save_projects', 20, 60000)) {
+                window.SecurityUtils?.logSecurityEvent('rate_limit_exceeded', { action: 'save_projects', userId });
+                throw new Error('Rate limit exceeded. Please try again later.');
+            }
+            
+            // Validate and sanitize all projects before saving
+            const sanitizedProjects = projects.map(project => {
+                // Validate title
+                if (!window.SecurityUtils?.validateTitle(project.title)) {
+                    window.SecurityUtils?.logSecurityEvent('invalid_title', { title: project.title, userId });
+                    throw new Error('Invalid project title detected');
+                }
+                
+                // Validate notes  
+                if (!window.SecurityUtils?.validateNotes(project.notes || '')) {
+                    window.SecurityUtils?.logSecurityEvent('invalid_notes', { userId });
+                    throw new Error('Invalid project notes detected');
+                }
+                
+                return {
+                    title: window.SecurityUtils?.sanitizeHTML(project.title) || project.title,
+                    notes: window.SecurityUtils?.sanitizeRichText(project.notes || '') || project.notes,
+                    emoji: project.emoji, // Emojis are safe
+                    date: project.date
+                };
+            });
+            
+            if (window.notesService) {
+                await window.notesService.saveProjects(userId, sanitizedProjects);
+            } else {
+                const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
+                await window.setDoc(docRef, { projects: sanitizedProjects });
+            }
+            console.log('Projects saved to Firestore (fallback)');
     } catch (error) {
         console.error('Error saving to cloud:', error);
-        console.error('Error details:', error.message, error.code);
-        
-        // Show user-friendly error message based on error type
-        if (error.message.includes('Session expired') || error.message.includes('not authenticated')) {
-            // Authentication error - show a helpful message with option to sign in
-            const shouldSignIn = confirm('Your session has expired. Sign in again to save your changes to the cloud?\n\nClick OK to sign in, or Cancel to continue working offline.');
-            if (shouldSignIn) {
-                signInWithGoogle();
-            }
-        } else if (error.message.includes('Rate limit')) {
-            alert('You are saving too frequently. Please wait a moment before saving again.');
-        } else if (error.message.includes('Invalid')) {
-            alert('Please check your project content. Some content may contain unsafe characters.');
-        } else if (error.message.includes('Missing or insufficient permissions')) {
-            // Firestore permission error
-            alert('You don\'t have permission to save to the cloud. Please sign in first.');
-        } else {
-            // For other errors, show detailed error in console but friendly message to user
-            console.warn('Failed to save to cloud, but your changes are saved locally.');
-            console.warn('Error reason:', error.message);
-            // Only show alert for critical errors that need user attention
-            if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
-                alert('Please sign in to save your changes to the cloud.');
-            }
-        }
+        console.warn('Failed to save, but changes are saved locally');
+        // Don't show alerts for save errors, just log them
     }
 }
 const emojis = ['🌸', '🍂', '☁️', '✨', '🌙', '🌿', '🎨', '📖', '🕊️', '🦋'];
@@ -618,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
             debouncedAutoSave = () => {
-                if (saveTimeout) clearTimeout(saveTimeout);
+                if (saveTimeout) {clearTimeout(saveTimeout);}
                 saveTimeout = setTimeout(autoSaveNotes, 1000);
             };
         }
