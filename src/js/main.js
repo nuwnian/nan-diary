@@ -28,7 +28,6 @@ function isMobileDevice() {
 
 async function signInWithGoogle() {
     await waitForFirebase();
-    const provider = new window.GoogleAuthProvider();
     const isMobile = isMobileDevice();
     
     try {
@@ -41,12 +40,22 @@ async function signInWithGoogle() {
         if (isMobile) {
             // Mobile: use redirect (better UX, avoids popup blockers)
             console.log('Using mobile redirect authentication');
-            await window.signInWithRedirect(window.firebaseAuth, provider);
+            if (window.authService) {
+                await window.authService.signIn(true);
+            } else {
+                // Fallback to direct global
+                await window.signInWithRedirect(window.firebaseAuth, new window.GoogleAuthProvider());
+            }
             // Redirect will handle the rest - no code after this executes
         } else {
             // Desktop: use popup
             console.log('Using desktop popup authentication');
-            const result = await window.signInWithPopup(window.firebaseAuth, provider);
+            let result;
+            if (window.authService) {
+                result = await window.authService.signIn(false);
+            } else {
+                result = await window.signInWithPopup(window.firebaseAuth, new window.GoogleAuthProvider());
+            }
             userId = result.user.uid;
             loadProjectsFromCloud();
             console.log('Signed in successfully');
@@ -112,8 +121,13 @@ async function handleMobileRedirectResult() {
     
     try {
         console.log('Checking for mobile redirect result...');
-        const result = await window.getRedirectResult(window.firebaseAuth);
-        
+        let result;
+        if (window.authService) {
+            result = await window.authService.getRedirectResult();
+        } else {
+            result = await window.getRedirectResult(window.firebaseAuth);
+        }
+
         if (result && result.user) {
             console.log('Mobile redirect sign-in successful:', result.user.email);
             userId = result.user.uid;
@@ -155,7 +169,7 @@ waitForFirebase().then(() => {
     // Handle mobile redirect result if user returned from OAuth
     handleMobileRedirectResult();
     
-    window.onAuthStateChanged(window.firebaseAuth, (user) => {
+    const authListener = (user) => {
         console.log('Auth state changed. User:', user ? 'signed in' : 'signed out');
         const signInBtn = document.getElementById('signInBtn');
         const signOutBtn = document.getElementById('signOutBtn');
@@ -218,22 +232,33 @@ waitForFirebase().then(() => {
                 mobileSignOutBtn.style.display = 'none';
             }
         }
-    });
+    };
+
+    if (window.authService) {
+        window.authService.onAuthStateChanged(authListener);
+    } else {
+        window.onAuthStateChanged(window.firebaseAuth, authListener);
+    }
 });
 
 async function loadProjectsFromCloud() {
     if (!userId || !isFirebaseReady) {return;}
     try {
-        const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
-        const docSnap = await window.getDoc(docRef);
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.projects) {
-                projects.length = 0;
-                projects.push(...data.projects);
-                renderProjects();
-                console.log('Projects loaded from cloud');
+        let data = [];
+        if (window.notesService) {
+            data = await window.notesService.loadProjects(userId);
+        } else {
+            const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
+            const docSnap = await window.getDoc(docRef);
+            if (docSnap.exists()) {
+                data = docSnap.data().projects || [];
             }
+        }
+        if (data && data.length) {
+            projects.length = 0;
+            projects.push(...data);
+            renderProjects();
+            console.log('Projects loaded from cloud');
         }
     } catch (error) {
         console.error('Error loading from cloud:', error);
@@ -279,8 +304,12 @@ async function saveProjectsToCloud() {
             };
         });
         
-        const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
-        await window.setDoc(docRef, { projects: sanitizedProjects });
+        if (window.notesService) {
+            await window.notesService.saveProjects(userId, sanitizedProjects);
+        } else {
+            const docRef = window.doc(window.firebaseDb, 'diaryProjects', userId);
+            await window.setDoc(docRef, { projects: sanitizedProjects });
+        }
         console.log('Projects saved to cloud');
     } catch (error) {
         console.error('Error saving to cloud:', error);
