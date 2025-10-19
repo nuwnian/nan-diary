@@ -12,7 +12,6 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [showEmailForm, setShowEmailForm] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -85,11 +84,11 @@ export default function SignUp() {
 
   return (
     <div className="neuro-bg min-h-screen flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 pb-16 sm:pb-24">
         <div className="w-full max-w-md">
           {/* Back Button */}
           <button
-            onClick={() => window.history.back()}
+            onClick={() => window.location.href = '/'}
             className="neuro-button rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-4 sm:mb-6 text-[#333]"
           >
             <i className="bx bx-arrow-back text-lg sm:text-xl"></i>
@@ -104,54 +103,8 @@ export default function SignUp() {
             {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
             {success && <div className="text-green-600 mb-4 text-center">{success}</div>}
 
-            {/* OAuth Icons */}
-            <div className="flex justify-center gap-4 mb-6">
-              <button
-                type="button"
-                onClick={handleGoogleSignUp}
-                className="neuro-button rounded-2xl w-16 h-16 flex items-center justify-center text-[#DB4437] hover:text-white hover:bg-[#DB4437] transition-all shadow-lg"
-                disabled={loading}
-                title="Sign up with Google"
-              >
-                <i className="bx bxl-google text-3xl"></i>
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleFacebookSignUp}
-                className="neuro-button rounded-2xl w-16 h-16 flex items-center justify-center text-[#4267B2] hover:text-white hover:bg-[#4267B2] transition-all shadow-lg"
-                disabled={loading}
-                title="Sign up with Facebook"
-              >
-                <i className="bx bxl-facebook text-3xl"></i>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowEmailForm(!showEmailForm)}
-                className={`neuro-button rounded-2xl w-16 h-16 flex items-center justify-center transition-all shadow-lg ${
-                  showEmailForm 
-                    ? 'text-white bg-[#8EB69B]' 
-                    : 'text-[#8EB69B] hover:text-white hover:bg-[#8EB69B]'
-                }`}
-                disabled={loading}
-                title="Sign up with Email"
-              >
-                <i className="bx bx-envelope text-3xl"></i>
-              </button>
-            </div>
-
-            {/* Divider */}
-            {showEmailForm && (
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex-1 h-px bg-[#ddd]"></div>
-                <span className="text-[#666] text-sm">or sign up with email</span>
-                <div className="flex-1 h-px bg-[#ddd]"></div>
-              </div>
-            )}
-
-            {showEmailForm && (
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            {/* Email Sign Up Form - Always Visible */}
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Full Name */}
                 <div>
                   <label htmlFor="fullName" className="block text-[#333] mb-2">
@@ -237,13 +190,42 @@ export default function SignUp() {
                   {loading ? 'Signing Up...' : 'Sign Up'}
                 </button>
               </form>
-            )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-[#ddd]"></div>
+              <span className="text-[#666] text-sm">or continue with</span>
+              <div className="flex-1 h-px bg-[#ddd]"></div>
+            </div>
+
+            {/* Social Media Sign Up Options */}
+            <div className="flex justify-center gap-4 mb-6">
+              <button
+                type="button"
+                onClick={handleGoogleSignUp}
+                className="neuro-button rounded-2xl w-16 h-16 flex items-center justify-center text-[#DB4437] hover:text-white hover:bg-[#DB4437] transition-all shadow-lg"
+                disabled={loading}
+                title="Sign up with Google"
+              >
+                <i className="bx bxl-google text-3xl"></i>
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleFacebookSignUp}
+                className="neuro-button rounded-2xl w-16 h-16 flex items-center justify-center text-[#4267B2] hover:text-white hover:bg-[#4267B2] transition-all shadow-lg"
+                disabled={loading}
+                title="Sign up with Facebook"
+              >
+                <i className="bx bxl-facebook text-3xl"></i>
+              </button>
+            </div>
 
             <div className="mt-6 text-center">
               <p className="text-[#666]">
                 Already have an account?{' '}
                 <button className="text-[#8EB69B] hover:underline">
-                  Sign In
+                  Login
                 </button>
               </p>
             </div>
