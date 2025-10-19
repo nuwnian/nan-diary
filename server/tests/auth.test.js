@@ -1,12 +1,33 @@
 const request = require('supertest');
+
+// Mock firebase config module before loading the app so middleware uses mocks
+jest.mock('../src/config/firebase', () => ({
+  getAuth: jest.fn(),
+  getFirestore: jest.fn(),
+  initializeFirebaseAdmin: jest.fn(),
+  admin: {},
+}));
+
+const firebase = require('../src/config/firebase');
 const app = require('../src/index');
-const { getAuth } = require('../src/config/firebase');
+
+beforeEach(() => {
+  // Ensure getAuth is a jest mock function so we can control returned mock methods
+  if (!jest.isMockFunction(firebase.getAuth)) {
+    firebase.getAuth = jest.fn();
+  }
+  firebase.getAuth.mockReturnValue({
+    verifyIdToken: jest.fn(),
+    getUser: jest.fn(),
+  });
+});
 
 describe('Auth Routes', () => {
   describe('POST /api/auth/verify', () => {
     it('should verify a valid token', async () => {
       // Mock successful token verification
-      getAuth().verifyIdToken.mockResolvedValue({
+      const auth = firebase.getAuth();
+      auth.verifyIdToken.mockResolvedValue({
         uid: 'test-user-123',
         email: 'test@example.com',
         email_verified: true,
@@ -26,8 +47,9 @@ describe('Auth Routes', () => {
     });
 
     it('should reject invalid token', async () => {
-      // Mock failed token verification
-      getAuth().verifyIdToken.mockRejectedValue(new Error('Invalid token'));
+  // Mock failed token verification
+  const auth = firebase.getAuth();
+  auth.verifyIdToken.mockRejectedValue(new Error('Invalid token'));
 
       const response = await request(app)
         .post('/api/auth/verify')
@@ -54,13 +76,15 @@ describe('Auth Routes', () => {
   describe('GET /api/auth/me', () => {
     it('should return user info with valid authentication', async () => {
       // Mock token verification
-      getAuth().verifyIdToken.mockResolvedValue({
+      const auth = firebase.getAuth();
+      auth.verifyIdToken.mockResolvedValue({
         uid: 'test-user-123',
         email: 'test@example.com',
       });
 
       // Mock user info retrieval
-      getAuth().getUser.mockResolvedValue({
+      const auth2 = firebase.getAuth();
+      auth2.getUser.mockResolvedValue({
         uid: 'test-user-123',
         email: 'test@example.com',
         emailVerified: true,

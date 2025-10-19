@@ -81,30 +81,33 @@ app.use(notFoundHandler);
 // Global error handler
 app.use(errorHandler);
 
-// Start server
+// Export app for testing. Start the HTTP server only when this file is run directly.
 const PORT = config.port;
-const server = app.listen(PORT, () => {
-  logger.info(`🚀 Server started successfully`);
-  logger.info(`📡 Listening on port ${PORT}`);
-  logger.info(`🌍 Environment: ${config.nodeEnv}`);
-  logger.info(`🔥 Firebase Project: ${config.firebase.projectId}`);
-});
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    logger.info(`🚀 Server started successfully`);
+    logger.info(`📡 Listening on port ${PORT}`);
+    logger.info(`🌍 Environment: ${config.nodeEnv}`);
+    logger.info(`🔥 Firebase Project: ${config.firebase.projectId}`);
   });
-});
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT signal received: closing HTTP server');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    process.exit(0);
+  // Graceful shutdown when running as a standalone process
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
   });
-});
+
+  process.on('SIGINT', () => {
+    logger.info('SIGINT signal received: closing HTTP server');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      process.exit(0);
+    });
+  });
+}
 
 module.exports = app; // Export for testing

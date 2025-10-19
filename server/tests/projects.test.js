@@ -1,17 +1,50 @@
 const request = require('supertest');
+
+// Mock firebase config module before loading the app so middleware uses mocks
+jest.mock('../src/config/firebase', () => ({
+  getAuth: jest.fn(),
+  getFirestore: jest.fn(),
+  initializeFirebaseAdmin: jest.fn(),
+  admin: {},
+}));
+
+const firebase = require('../src/config/firebase');
 const app = require('../src/index');
-const { getAuth, getFirestore } = require('../src/config/firebase');
 
 describe('Projects Routes', () => {
   const mockToken = 'test-valid-token-000';
   const mockUserId = 'test-user-123';
 
   beforeEach(() => {
+    // Ensure getAuth and getFirestore are mock functions
+    if (!jest.isMockFunction(firebase.getAuth)) {
+      firebase.getAuth = jest.fn();
+    }
+    if (!jest.isMockFunction(firebase.getFirestore)) {
+      firebase.getFirestore = jest.fn();
+    }
+
     // Mock authentication
-    getAuth().verifyIdToken.mockResolvedValue({
+    const authMock = {
+      verifyIdToken: jest.fn(),
+      getUser: jest.fn(),
+    };
+    firebase.getAuth.mockReturnValue(authMock);
+    authMock.verifyIdToken.mockResolvedValue({
       uid: mockUserId,
       email: 'test@example.com',
     });
+
+    // Mock Firestore object chain: collection().doc().get/set
+    const docMock = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+    const collectionMock = jest.fn(() => ({ doc: jest.fn(() => docMock) }));
+    const firestoreMock = {
+      collection: collectionMock,
+    };
+    firebase.getFirestore.mockReturnValue(firestoreMock);
   });
 
   describe('GET /api/projects', () => {
@@ -30,7 +63,7 @@ describe('Projects Routes', () => {
         exists: true,
         data: () => ({ projects: mockProjects }),
       };
-      getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
+  firebase.getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
 
       const response = await request(app)
         .get('/api/projects')
@@ -49,7 +82,7 @@ describe('Projects Routes', () => {
       const mockDocSnap = {
         exists: false,
       };
-      getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
+  firebase.getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
 
       const response = await request(app)
         .get('/api/projects')
@@ -84,7 +117,7 @@ describe('Projects Routes', () => {
       ];
 
       // Mock Firestore set
-      getFirestore().collection().doc().set.mockResolvedValue();
+  firebase.getFirestore().collection().doc().set.mockResolvedValue();
 
       const response = await request(app)
         .post('/api/projects')
@@ -121,8 +154,8 @@ describe('Projects Routes', () => {
         exists: true,
         data: () => ({ projects: [] }),
       };
-      getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
-      getFirestore().collection().doc().set.mockResolvedValue();
+  firebase.getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
+  firebase.getFirestore().collection().doc().set.mockResolvedValue();
 
       const response = await request(app)
         .post('/api/projects/add')
@@ -152,8 +185,8 @@ describe('Projects Routes', () => {
         exists: true,
         data: () => ({ projects: mockProjects }),
       };
-      getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
-      getFirestore().collection().doc().set.mockResolvedValue();
+  firebase.getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
+  firebase.getFirestore().collection().doc().set.mockResolvedValue();
 
       const response = await request(app)
         .delete('/api/projects/0')
@@ -171,7 +204,7 @@ describe('Projects Routes', () => {
         exists: true,
         data: () => ({ projects: [] }),
       };
-      getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
+  firebase.getFirestore().collection().doc().get.mockResolvedValue(mockDocSnap);
 
       const response = await request(app)
         .delete('/api/projects/0')
