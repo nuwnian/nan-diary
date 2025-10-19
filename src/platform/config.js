@@ -3,7 +3,7 @@
 // or the HTML can call `initFirebase()` to set up globals for backward compatibility.
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, FacebookAuthProvider } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { getFirestore, doc, setDoc, getDoc, collection } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
 
@@ -50,10 +50,13 @@ export function initFirebase() {
     window.firebaseAuth = auth;
     window.firebaseDb = db;
     window.GoogleAuthProvider = GoogleAuthProvider;
+    window.FacebookAuthProvider = FacebookAuthProvider;
     window.signInWithPopup = signInWithPopup;
     window.signInWithRedirect = signInWithRedirect;
     window.getRedirectResult = getRedirectResult;
     window.onAuthStateChanged = onAuthStateChanged;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     window.doc = doc;
     window.setDoc = setDoc;
     window.getDoc = getDoc;

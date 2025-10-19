@@ -44,7 +44,7 @@ export default function App() {
   ];
 
   if (currentPage === 'signup') {
-    return <SignUp onBackToDashboard={() => setCurrentPage('dashboard')} />;
+    return <SignUp />;
   }
 
   const NavigationMenu = () => (
