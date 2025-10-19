@@ -597,35 +597,35 @@ document.addEventListener('DOMContentLoaded', () => {
         detailNotes.addEventListener('focus', updateToolbarState);
         detailNotes.addEventListener('blur', updateToolbarState);
         
-        // Auto-save functionality: save notes as user types (with debouncing)
-        let saveTimeout = null;
-        const autoSaveNotes = () => {
-            if (currentProjectIndex !== null && currentProjectIndex >= 0 && currentProjectIndex < projects.length) {
-                // Save the current content
-                const currentTitle = document.getElementById('detailTitle').value;
-                const currentNotes = detailNotes.innerHTML;
-                
-                projects[currentProjectIndex].title = currentTitle;
-                projects[currentProjectIndex].notes = currentNotes;
-                
-                // Update the main grid and save to cloud
-                renderProjects();
-                saveProjectsToCloud();
-                
-                console.log('Auto-saved notes for project:', projects[currentProjectIndex].title);
-            }
-        };
+        // Auto-save functionality: delegate to syncNotes use-case if available
+        let debouncedAutoSave;
+        try {
+            // createSyncNotesUseCase factory provided in src/usecases/syncNotesUseCase.browser.js
+            const syncUseCase = window.createSyncNotesUseCase({ notesService: window.notesService, securityUtils: window.SecurityUtils, wait: 1000 });
+            debouncedAutoSave = syncUseCase.createAutoSave(() => ({ userId, projects }));
+        } catch (e) {
+            // Fallback to legacy inline debounce if use-case not available or fails
+            let saveTimeout = null;
+            const autoSaveNotes = () => {
+                if (currentProjectIndex !== null && currentProjectIndex >= 0 && currentProjectIndex < projects.length) {
+                    const currentTitle = document.getElementById('detailTitle').value;
+                    const currentNotes = detailNotes.innerHTML;
+                    projects[currentProjectIndex].title = currentTitle;
+                    projects[currentProjectIndex].notes = currentNotes;
+                    renderProjects();
+                    saveProjectsToCloud();
+                    console.log('Auto-saved notes for project:', projects[currentProjectIndex].title);
+                }
+            };
+            debouncedAutoSave = () => {
+                if (saveTimeout) clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(autoSaveNotes, 1000);
+            };
+        }
         
-        const debouncedAutoSave = () => {
-            if (saveTimeout) {
-                clearTimeout(saveTimeout);
-            }
-            saveTimeout = setTimeout(autoSaveNotes, 1000); // Save 1 second after user stops typing
-        };
-        
-        // Add auto-save listeners
-        detailNotes.addEventListener('input', debouncedAutoSave);
-        detailNotes.addEventListener('paste', debouncedAutoSave);
+    // Add auto-save listeners (debounced)
+    detailNotes.addEventListener('input', () => debouncedAutoSave());
+    detailNotes.addEventListener('paste', () => debouncedAutoSave());
         
         // Also auto-save when title changes
         const detailTitle = document.getElementById('detailTitle');
