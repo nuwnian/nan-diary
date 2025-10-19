@@ -12,6 +12,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -103,112 +104,140 @@ export default function SignUp() {
             {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
             {success && <div className="text-green-600 mb-4 text-center">{success}</div>}
 
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              {/* Full Name */}
-              <div>
-                <label htmlFor="fullName" className="block text-[#333] mb-2">
-                  Full Name
-                </label>
-                <div className="neuro-inset rounded-2xl px-4 py-3">
-                  <input
-                    type="text"
-                    id="fullName"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-[#333] mb-2">
-                  Email Address
-                </label>
-                <div className="neuro-inset rounded-2xl px-4 py-3">
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="john@example.com"
-                    className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label htmlFor="password" className="block text-[#333] mb-2">
-                  Password
-                </label>
-                <div className="neuro-inset rounded-2xl px-4 py-3">
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="••••••••"
-                    className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-[#333] mb-2">
-                  Confirm Password
-                </label>
-                <div className="neuro-inset rounded-2xl px-4 py-3">
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="••••••••"
-                    className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="w-full neuro-button-accent rounded-2xl px-6 py-3 text-white transition-all"
-                disabled={loading}
-              >
-                {loading ? 'Signing Up...' : 'Sign Up'}
-              </button>
-            </form>
-
-            {/* OAuth Buttons */}
-            <div className="mt-4 flex flex-col gap-3">
+            {/* OAuth Icons */}
+            <div className="flex justify-center gap-4 mb-6">
               <button
                 type="button"
                 onClick={handleGoogleSignUp}
-                className="w-full neuro-button rounded-2xl px-6 py-3 text-[#333] bg-white border"
+                className="neuro-button rounded-2xl w-16 h-16 flex items-center justify-center text-[#DB4437] hover:text-white hover:bg-[#DB4437] transition-all shadow-lg"
                 disabled={loading}
+                title="Sign up with Google"
               >
-                Sign Up with Google
+                <i className="bx bxl-google text-3xl"></i>
               </button>
+              
               <button
                 type="button"
                 onClick={handleFacebookSignUp}
-                className="w-full neuro-button rounded-2xl px-6 py-3 text-[#333] bg-white border"
+                className="neuro-button rounded-2xl w-16 h-16 flex items-center justify-center text-[#4267B2] hover:text-white hover:bg-[#4267B2] transition-all shadow-lg"
                 disabled={loading}
+                title="Sign up with Facebook"
               >
-                Sign Up with Facebook
+                <i className="bx bxl-facebook text-3xl"></i>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowEmailForm(!showEmailForm)}
+                className={`neuro-button rounded-2xl w-16 h-16 flex items-center justify-center transition-all shadow-lg ${
+                  showEmailForm 
+                    ? 'text-white bg-[#8EB69B]' 
+                    : 'text-[#8EB69B] hover:text-white hover:bg-[#8EB69B]'
+                }`}
+                disabled={loading}
+                title="Sign up with Email"
+              >
+                <i className="bx bx-envelope text-3xl"></i>
               </button>
             </div>
+
+            {/* Divider */}
+            {showEmailForm && (
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex-1 h-px bg-[#ddd]"></div>
+                <span className="text-[#666] text-sm">or sign up with email</span>
+                <div className="flex-1 h-px bg-[#ddd]"></div>
+              </div>
+            )}
+
+            {showEmailForm && (
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                {/* Full Name */}
+                <div>
+                  <label htmlFor="fullName" className="block text-[#333] mb-2">
+                    Full Name
+                  </label>
+                  <div className="neuro-inset rounded-2xl px-4 py-3">
+                    <input
+                      type="text"
+                      id="fullName"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                      className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label htmlFor="email" className="block text-[#333] mb-2">
+                    Email Address
+                  </label>
+                  <div className="neuro-inset rounded-2xl px-4 py-3">
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="john@example.com"
+                      className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label htmlFor="password" className="block text-[#333] mb-2">
+                    Password
+                  </label>
+                  <div className="neuro-inset rounded-2xl px-4 py-3">
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Confirm Password */}
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-[#333] mb-2">
+                    Confirm Password
+                  </label>
+                  <div className="neuro-inset rounded-2xl px-4 py-3">
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="w-full neuro-button-accent rounded-2xl px-6 py-3 text-white transition-all"
+                  disabled={loading}
+                >
+                  {loading ? 'Signing Up...' : 'Sign Up'}
+                </button>
+              </form>
+            )}
 
             <div className="mt-6 text-center">
               <p className="text-[#666]">
