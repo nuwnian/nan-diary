@@ -29,7 +29,7 @@ export function initFirebase() {
     
     // Final fallback for development
     if (!apiKey || apiKey === "PLACEHOLDER_FOR_BUILD_INJECTION") {
-        apiKey = "AIzaSyBEVsUoMxRp3vZqBJQ9cZxQVXEYjVMN-HI"; // Your project's API key
+        apiKey = "AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ"; // Your project's actual API key
     }
     
     window.ENV.FIREBASE_API_KEY = apiKey;
