@@ -12,21 +12,24 @@ export function initFirebase() {
     window.ENV = window.ENV || {};
     
     // Get API key from multiple sources (in order of priority):
-    // 1. Already set in window.ENV (e.g., from env-loader.js)
-    // 2. Vite build-time injection via import.meta.env (if using Vite)
-    // 3. Environment variable (process.env for Node/build contexts)
-    // 4. Fallback placeholder for development
-    let apiKey = window.ENV.FIREBASE_API_KEY;
+    // 1. Vite build-time injection via import.meta.env (primary source)
+    // 2. Already set in window.ENV (e.g., from env-loader.js)
+    // 3. Fallback API key for development
+    let apiKey = null;
     
+    // Try to get from Vite environment first (most reliable)
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_FIREBASE_API_KEY) {
+        apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+    }
+    
+    // Fallback to window.ENV if Vite env not available
+    if (!apiKey && window.ENV && window.ENV.FIREBASE_API_KEY) {
+        apiKey = window.ENV.FIREBASE_API_KEY;
+    }
+    
+    // Final fallback for development
     if (!apiKey || apiKey === "PLACEHOLDER_FOR_BUILD_INJECTION") {
-        // Try to get from Vite environment if available
-        if (typeof import.meta !== 'undefined' && import.meta.env) {
-            apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
-        }
-        // Fallback for development - will be replaced during build
-        if (!apiKey) {
-            apiKey = "AIzaSyBEVsUoMxRp3vZqBJQ9cZxQVXEYjVMN-HI"; // Public web API key - safe to expose
-        }
+        apiKey = "AIzaSyBEVsUoMxRp3vZqBJQ9cZxQVXEYjVMN-HI"; // Your project's API key
     }
     
     window.ENV.FIREBASE_API_KEY = apiKey;
