@@ -2,7 +2,11 @@ import { useState } from 'react';
 import Footer from './footer';
 // Use Firebase Auth from window (initialized via src/platform/config.js)
 
-export default function SignUp() {
+interface SignUpProps {
+  onNavigate: (page: 'dashboard' | 'signup' | 'login') => void;
+}
+
+export default function SignUp({ onNavigate }: SignUpProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -88,7 +92,7 @@ export default function SignUp() {
         <div className="w-full max-w-md">
           {/* Back Button */}
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => onNavigate('dashboard')}
             className="neuro-button rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-4 sm:mb-6 text-[#333]"
           >
             <i className="bx bx-arrow-back text-lg sm:text-xl"></i>
@@ -224,7 +228,10 @@ export default function SignUp() {
             <div className="mt-6 text-center">
               <p className="text-[#666]">
                 Already have an account?{' '}
-                <button className="text-[#8EB69B] hover:underline">
+                <button 
+                  onClick={() => onNavigate('login')}
+                  className="text-[#8EB69B] hover:underline"
+                >
                   Login
                 </button>
               </p>

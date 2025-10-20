@@ -1,10 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SignUp from './components/signup';
+import Login from './components/login';
 import Footer from './components/footer';
 import { Sheet, SheetContent } from './components/ui/sheet';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup' | 'login'>('dashboard');
+
+  // Simple URL-based routing
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/signup') {
+      setCurrentPage('signup');
+    } else if (path === '/login') {
+      setCurrentPage('login');
+    } else {
+      setCurrentPage('dashboard');
+    }
+
+    // Listen for browser navigation
+    const handlePopState = () => {
+      const currentPath = window.location.pathname;
+      if (currentPath === '/signup') {
+        setCurrentPage('signup');
+      } else if (currentPath === '/login') {
+        setCurrentPage('login');
+      } else {
+        setCurrentPage('dashboard');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (page: 'dashboard' | 'signup' | 'login') => {
+    const paths = {
+      dashboard: '/',
+      signup: '/signup', 
+      login: '/login'
+    };
+    
+    window.history.pushState({}, '', paths[page]);
+    setCurrentPage(page);
+  };
   const [activeLink, setActiveLink] = useState('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -44,7 +83,11 @@ export default function App() {
   ];
 
   if (currentPage === 'signup') {
-    return <SignUp />;
+    return <SignUp onNavigate={navigateTo} />;
+  }
+
+  if (currentPage === 'login') {
+    return <Login onNavigate={navigateTo} />;
   }
 
   const NavigationMenu = () => (
@@ -118,9 +161,18 @@ export default function App() {
             <div className="flex items-center gap-3 ml-auto">
               <span className="text-[#333] hidden lg:block">Welcome back, User</span>
               
+              {/* Login Button */}
+              <button 
+                onClick={() => navigateTo('login')}
+                className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] flex items-center gap-2"
+              >
+                <i className="bx bx-log-in text-lg lg:text-xl"></i>
+                <span className="hidden sm:inline">Login</span>
+              </button>
+
               {/* Sign Up Button */}
               <button 
-                onClick={() => setCurrentPage('signup')}
+                onClick={() => navigateTo('signup')}
                 className="neuro-button-accent rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-white flex items-center gap-2"
               >
                 <i className="bx bx-user-plus text-lg lg:text-xl"></i>
