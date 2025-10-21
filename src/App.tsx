@@ -1,3 +1,14 @@
+import { useState, useEffect } from 'react';
+import SignUp from './components/signup';
+import Login from './components/login';
+import Footer from './components/footer';
+import { Sheet, SheetContent } from './components/ui/sheet';
+import CloverIcon from './components/CloverIcon';
+import ThemeToggle from './components/ThemeToggle';
+import ErrorBoundary from './components/ErrorBoundary';
+import { ThemeProvider } from './components/ThemeProvider';
+import Card from './components/Card';
+
 // Extend window type for authService
 declare global {
   interface Window {
@@ -13,8 +24,16 @@ declare global {
     };
   }
 }
-import { useState, useEffect } from 'react';
 
+// User type for auth
+type AuthUser = {
+  displayName?: string;
+  email?: string;
+  photoURL?: string;
+  uid?: string;
+};
+
+// Move component outside to prevent re-creation on each render
 function CopyEmailField() {
   const [copied, setCopied] = useState(false);
   return (
@@ -23,12 +42,12 @@ function CopyEmailField() {
         type="text"
         value="yulfa.anni531@gmail.com"
         readOnly
-        className="border rounded-lg px-3 py-2 text-[#333] flex-1 bg-[#f9f9f9] focus:outline-none"
+        className="border rounded-lg px-3 py-2 text-[#333] dark:text-[#e0e0e0] flex-1 bg-[#f9f9f9] dark:bg-[#363636] focus:outline-none border-[#ddd] dark:border-[#555]"
         style={{ minWidth: '0' }}
         onFocus={e => e.target.select()}
       />
       <button
-        className="neuro-button px-3 py-2 rounded-lg text-[#333] border border-[#8EB69B] hover:bg-[#f5f5f5]"
+        className="neuro-button px-3 py-2 rounded-lg text-[#333] dark:text-[#e0e0e0] border border-[#8EB69B] hover:bg-[#f5f5f5] dark:hover:bg-[#363636]"
         onClick={() => {
           navigator.clipboard.writeText('yulfa.anni531@gmail.com');
           setCopied(true);
@@ -41,63 +60,58 @@ function CopyEmailField() {
     </div>
   );
 }
-// User type for auth
-type AuthUser = {
-  displayName?: string;
-  email?: string;
-  photoURL?: string;
-  uid?: string;
-};
-import SignUp from './components/signup';
-import Login from './components/login';
-import Footer from './components/footer';
-import { Sheet, SheetContent } from './components/ui/sheet';
-import CloverIcon from './components/CloverIcon';
 
-// Card type for Firestore notes
 type NoteCard = {
   id: string | number;
   title: string;
-  description: string;
+  notes?: string;
   image?: string;
   date?: string;
 };
 
-export default function App() {
+
+
+function AppContent() {
   // Google sign-in implementation
   const handleGoogleSignIn = async () => {
     if (window.authService && window.authService.signIn) {
       try {
         await window.authService.signIn(false);
       } catch (e) {
-        alert('Google sign-in failed.');
+        console.error('Sign-in error:', e);
+        alert('Sign-in failed. Please try again.');
       }
     } else {
-      alert('Google sign-in not available.');
+      alert('Sign-in service unavailable. Please refresh the page.');
     }
   };
   const [user, setUser] = useState<AuthUser | null>(null);
-  const defaultImage = '/src/assets/note-default.svg';
   const [cards, setCards] = useState<NoteCard[]>([]);
 
   // Load notes from Firestore
   const loadUserNotes = async (uid?: string) => {
-    if (!uid || !window.notesService || !window.notesService.loadProjects) return;
+    if (!uid || !window.notesService?.loadProjects) {
+
+      return;
+    }
     try {
       const projects = await window.notesService.loadProjects(uid);
-      setCards(
-        projects.map((note: any, idx: number) => ({
-          id: note.id || idx,
-          title: note.title || 'Untitled',
-          description: note.notes || '',
-          image: note.image || defaultImage,
-          date: note.date,
-        }))
-      );
+      const mappedCards = projects.map((note: any, idx: number) => ({
+        id: note.id || idx,
+        title: note.title || 'Untitled',
+        notes: note.notes || '',
+        image: note.image,
+        date: note.date,
+      }));
+
+      setCards(mappedCards);
     } catch (e) {
+      console.error('[DEBUG] Error loading projects:', e);
       setCards([]);
     }
   };
+  
+
   // Listen for auth state changes (Google/Facebook) and load notes
   useEffect(() => {
     if (window.authService && window.authService.onAuthStateChanged) {
@@ -131,15 +145,45 @@ export default function App() {
   }, []);
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup' | 'login' | 'support'>('dashboard');
 
-  // Reload notes when window regains focus (e.g. after closing note editor tab)
+
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  // Reload notes when window regains focus or when a note is added
   useEffect(() => {
     const onFocus = () => {
-      if (user && user.uid) loadUserNotes(user.uid);
+      if (user?.uid) loadUserNotes(user.uid);
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'nan-diary-note-added' && user?.uid) {
+        loadUserNotes(user.uid);
+      }
     };
     window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('storage', onStorage);
+    };
   }, [user]);
-  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isProfileMenuOpen && !target.closest('.profile-menu-container')) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    
+    if (isProfileMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isProfileMenuOpen]);
 
   // Simple URL-based routing
   useEffect(() => {
@@ -191,19 +235,7 @@ export default function App() {
 
   // (removed duplicate cards state)
 
-  // Handle image upload for a card
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, cardId: string | number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const newCards = cards.map(card =>
-        card.id === cardId ? { ...card, image: ev.target?.result as string } : card
-      );
-      setCards(newCards);
-    };
-    reader.readAsDataURL(file);
-  };
+
 
   if (currentPage === 'signup') {
     return <SignUp onNavigate={navigateTo} />;
@@ -218,20 +250,20 @@ export default function App() {
   const SupportModal = () => (
     isSupportModalOpen ? (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full relative">
+        <div className="bg-white dark:bg-[#2a2a2a] rounded-2xl shadow-lg p-8 max-w-md w-full relative">
           <button
-            className="absolute top-3 right-3 text-[#666] hover:text-[#333] text-2xl"
+            className="absolute top-3 right-3 text-[#666] dark:text-[#999] hover:text-[#333] dark:hover:text-[#e0e0e0] text-2xl"
             onClick={() => setIsSupportModalOpen(false)}
             aria-label="Close"
           >
             &times;
           </button>
-          <h2 className="text-2xl font-bold mb-4 text-[#333]">Support</h2>
-          <p className="mb-4 text-[#666]">If you need help or have questions, please contact me for support service.</p>
+          <h2 className="text-2xl font-bold mb-4 text-[#333] dark:text-[#e0e0e0]">Support</h2>
+          <p className="mb-4 text-[#666] dark:text-[#ccc]">If you need help or have questions, please contact me for support service.</p>
           <CopyEmailField />
           <a
             href="https://mail.google.com/mail/?view=cm&fs=1&to=yulfa.anni531@gmail.com"
-            className="neuro-button px-6 py-3 rounded-xl text-[#333] font-semibold block text-center border border-[#8EB69B] hover:bg-[#f5f5f5]"
+            className="neuro-button px-6 py-3 rounded-xl text-[#333] dark:text-[#e0e0e0] font-semibold block text-center border border-[#8EB69B] hover:bg-[#f5f5f5] dark:hover:bg-[#363636]"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -252,7 +284,7 @@ export default function App() {
             setIsMobileMenuOpen(false);
             if (link.onClick) link.onClick();
           }}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[#333] transition-all ${
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[#333] dark:text-[#e0e0e0] transition-all ${
             activeLink === link.id ? 'neuro-button active' : 'neuro-button'
           }`}
         >
@@ -272,7 +304,7 @@ export default function App() {
       <aside className="hidden lg:block w-64 p-6 neuro-bg flex-shrink-0">
         <div className="mb-8 flex items-center justify-center gap-2">
           <CloverIcon size={28} className="text-[#8EB69B]" />
-          <h1 className="text-[#333]">Dashboard</h1>
+          <h1 className="text-[#333] dark:text-[#e0e0e0]">Dashboard</h1>
         </div>
         <NavigationMenu />
       </aside>
@@ -282,7 +314,7 @@ export default function App() {
         <SheetContent side="left" className="neuro-bg border-0 p-6">
           <div className="mb-8 flex items-center justify-center gap-2">
             <CloverIcon size={28} className="text-[#8EB69B]" />
-            <h1 className="text-[#333]">Dashboard</h1>
+            <h1 className="text-[#333] dark:text-[#e0e0e0]">Dashboard</h1>
           </div>
           <NavigationMenu />
         </SheetContent>
@@ -298,7 +330,7 @@ export default function App() {
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden neuro-button rounded-xl w-10 h-10 flex items-center justify-center flex-shrink-0"
             >
-              <i className="bx bx-menu text-xl text-[#333]"></i>
+              <i className="bx bx-menu text-xl text-[#333] dark:text-[#e0e0e0]"></i>
             </button>
 
             {/* Search */}
@@ -308,14 +340,14 @@ export default function App() {
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="bg-transparent outline-none text-[#333] placeholder-[#999] w-full"
+                  className="bg-transparent outline-none text-[#333] dark:text-[#e0e0e0] placeholder-[#999] dark:placeholder-[#666] w-full"
                 />
               </div>
             </div>
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-3 ml-auto">
-              <span className="text-[#333] hidden lg:block">
+              <span className="text-[#333] dark:text-[#e0e0e0] hidden lg:block">
                 {user ? `Welcome back, ${user.displayName || user.email || 'User'}` : 'Welcome back, User'}
               </span>
               
@@ -323,7 +355,7 @@ export default function App() {
               {!user && (
                 <button 
                   onClick={handleGoogleSignIn}
-                  className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] flex items-center gap-2"
+                  className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] dark:text-[#e0e0e0] flex items-center gap-2"
                 >
                   <i className="bx bx-log-in text-lg lg:text-xl"></i>
                   <span className="hidden sm:inline">Sign In with Google</span>
@@ -341,17 +373,98 @@ export default function App() {
                 </button>
               )}
 
-              {/* User Icon */}
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
+              {/* User Profile Menu */}
               {user && (
-                <div className="neuro-card rounded-full w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center overflow-hidden">
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt={user.displayName || 'User Avatar'}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <i className="bx bx-user text-xl lg:text-2xl text-[#666]"></i>
+                <div className="relative profile-menu-container">
+                  <button
+                    className="neuro-card rounded-full w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center overflow-hidden cursor-pointer hover:shadow-lg transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsProfileMenuOpen(!isProfileMenuOpen);
+                    }}
+                  >
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt={user.displayName || 'User Avatar'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          (e.currentTarget.nextElementSibling as HTMLElement)?.style.setProperty('display', 'flex');
+                        }}
+                      />
+                    ) : null}
+                    <i className={`bx bx-user text-xl lg:text-2xl text-[#666] dark:text-[#999] ${user.photoURL ? 'hidden' : 'flex'}`}></i>
+                  </button>
+                  
+                  {/* Profile Dropdown Menu */}
+                  {isProfileMenuOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#2a2a2a] rounded-2xl shadow-lg border border-[#e0e0e0] dark:border-[#555] z-50">
+                      {/* User Info */}
+                      <div className="p-4 border-b border-[#e0e0e0] dark:border-[#555]">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full overflow-hidden">
+                            {user.photoURL ? (
+                              <img 
+                                src={user.photoURL} 
+                                alt="Profile" 
+                                className="w-full h-full object-cover" 
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  (e.currentTarget.nextElementSibling as HTMLElement)?.style.setProperty('display', 'flex');
+                                }}
+                              />
+                            ) : null}
+                            <div className={`w-full h-full bg-[#8EB69B] flex items-center justify-center ${user.photoURL ? 'hidden' : 'flex'}`}>
+                              <i className="bx bx-user text-white text-xl"></i>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-[#333] dark:text-[#e0e0e0] truncate">
+                              {user.displayName || 'User'}
+                            </p>
+                            <p className="text-sm text-[#666] dark:text-[#999] truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Menu Options */}
+                      <div className="p-2">
+                        <button
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[#333] dark:text-[#e0e0e0] hover:bg-[#f5f5f5] dark:hover:bg-[#363636] transition-colors"
+                          onClick={() => {
+                            // Add account switching logic here
+                            alert('Switch account feature - integrate with Google Account Chooser');
+                            setIsProfileMenuOpen(false);
+                          }}
+                        >
+                          <i className="bx bx-user-circle text-xl"></i>
+                          <span>Switch Account</span>
+                        </button>
+                        
+                        <button
+                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[#333] dark:text-[#e0e0e0] hover:bg-[#f5f5f5] dark:hover:bg-[#363636] transition-colors"
+                          onClick={async () => {
+                            try {
+                              if (window.authService?.signOut) {
+                                await window.authService.signOut();
+                              }
+                            } catch (e) {
+                              console.error('Sign out failed:', e);
+                            }
+                            setIsProfileMenuOpen(false);
+                          }}
+                        >
+                          <i className="bx bx-log-out text-xl"></i>
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -361,13 +474,13 @@ export default function App() {
 
         {/* Content Area */}
         <div className="flex-1 p-4 lg:p-6">
-          <main className="max-w-7xl mx-auto">
+          <main className="max-w-7xl mx-auto mb-16">
             {/* Header with New Button */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-[#333]">Projects</h2>
+              <h2 className="text-[#333] dark:text-[#e0e0e0]">Projects</h2>
               <button
-                className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] flex items-center gap-2"
-                onClick={() => window.open('/public/user-note.html', '_blank')}
+                className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] dark:text-[#e0e0e0] flex items-center gap-2"
+                onClick={() => window.open('/user-note.html', '_blank')}
               >
                 <i className="bx bx-plus text-lg lg:text-xl text-[#8EB69B]"></i>
                 <span>New</span>
@@ -376,38 +489,53 @@ export default function App() {
 
             {/* Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {cards.map((card) => (
-                <div
+              {cards.map((card, idx) => (
+                <Card
                   key={card.id}
-                  className="neuro-card rounded-3xl overflow-hidden cursor-pointer"
-                >
-                  <div className="aspect-[16/9] overflow-hidden flex flex-col items-center justify-center relative group">
-                    <img
-                      src={card.image}
-                      alt={card.title}
-                      className="w-full h-full object-cover"
-                      style={{ maxHeight: '180px', background: '#faf8f3' }}
-                    />
-                    <label
-                      className="absolute inset-0 flex items-center justify-center text-base text-white bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer font-semibold z-10"
-                      style={{ pointerEvents: 'auto', marginTop: 0 }}
-                    >
-                      Change Image
-                      <input
-                        type="file"
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                        onChange={(e) => handleImageUpload(e, card.id)}
-                      />
-                    </label>
-                  </div>
-                  <div className="p-4 lg:p-6">
-                    <h3 className="text-[#333] mb-2">{card.title}</h3>
-                    <p className="text-[#666]">{card.description}</p>
-                  </div>
-                </div>
+                  title={card.title}
+                  date={card.date || ''}
+                  image={card.image}
+                  onClick={() => window.open(`/edit-note.html?id=${card.id}`, '_blank')}
+                  onDelete={async (e) => {
+                    e.stopPropagation();
+                    const updated = cards.filter((_, i) => i !== idx);
+                    setCards(updated);
+                    
+                    // Save to Firestore
+                    if (user?.uid && window.notesService?.saveProjects) {
+                      try {
+                        await window.notesService.saveProjects(user.uid, updated);
+                      } catch (e) {
+                        console.error('Failed to delete note:', e);
+                      }
+                    }
+                  }}
+                  onImageChange={async (imageData) => {
+                    // Update local state
+                    const updatedCards = cards.map((c, i) => 
+                      i === idx ? { ...c, image: imageData } : c
+                    );
+                    setCards(updatedCards);
+                    
+                    // Save to Firestore
+                    if (user?.uid && window.notesService?.saveProjects) {
+                      try {
+                        await window.notesService.saveProjects(user.uid, updatedCards);
+                      } catch (e) {
+                        console.error('Failed to save image:', e);
+                      }
+                    }
+                  }}
+                />
               ))}
             </div>
+            
+            {/* Empty state */}
+            {cards.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-[#666] dark:text-[#ccc] text-lg">No cards to display</p>
+              </div>
+            )}
           </main>
         </div>
 
@@ -415,5 +543,15 @@ export default function App() {
         <Footer />
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

@@ -1,6 +1,19 @@
 // Sentry configuration for error tracking and monitoring
 import * as Sentry from '@sentry/react';
 
+// Extend ImportMeta to include 'env' for Vite
+interface ImportMetaEnv {
+  VITE_SENTRY_DSN?: string;
+  MODE?: string;
+  [key: string]: any;
+}
+
+declare global {
+  interface ImportMeta {
+    env: ImportMetaEnv;
+  }
+}
+
 export function initSentry() {
   // Only initialize in production or when explicitly enabled
   const sentryDsn = import.meta.env.VITE_SENTRY_DSN;

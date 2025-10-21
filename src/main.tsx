@@ -12,6 +12,10 @@ initSentry();
 // Initialize Firebase before rendering the app
 initFirebase();
 
+// Load notesService after Firebase is initialized
+// @ts-ignore
+import('./services/notesService.js');
+
 // Initialize authService wrapper after Firebase is ready
 (function () {
     function ensureFirebase() {
@@ -52,6 +56,8 @@ initFirebase();
         signOut
     };
 })();
+
+
 
 import ErrorBoundary from './components/ErrorBoundary';
 

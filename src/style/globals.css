@@ -201,7 +201,7 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-/* Neumorphic Styles */
+/* Neumorphic Styles - Light Mode */
 .neuro-bg {
   background: #e0e0e0;
 }
@@ -252,6 +252,52 @@ body {
   box-shadow: inset 3px 3px 6px #7da58a, inset -3px -3px 6px #9fc7ad;
 }
 
+/* Dark Mode Neumorphic Styles */
+.dark .neuro-bg {
+  background: #2a2a2a;
+}
+
+.dark .neuro-card {
+  background: #2a2a2a;
+  box-shadow: 8px 8px 16px #1e1e1e, -8px -8px 16px #363636;
+}
+
+.dark .neuro-card:hover {
+  box-shadow: 12px 12px 24px #1e1e1e, -12px -12px 24px #363636;
+}
+
+.dark .neuro-inset {
+  background: #2a2a2a;
+  box-shadow: inset 4px 4px 8px #1e1e1e, inset -4px -4px 8px #363636;
+}
+
+.dark .neuro-button {
+  background: #2a2a2a;
+  box-shadow: 6px 6px 12px #1e1e1e, -6px -6px 12px #363636;
+}
+
+.dark .neuro-button:hover {
+  box-shadow: 4px 4px 8px #1e1e1e, -4px -4px 8px #363636;
+}
+
+.dark .neuro-button:active,
+.dark .neuro-button.active {
+  box-shadow: inset 3px 3px 6px #1e1e1e, inset -3px -3px 6px #363636;
+}
+
+.dark .neuro-button-accent {
+  background: linear-gradient(145deg, #6b8e7a, #5a7a68);
+  box-shadow: 6px 6px 12px #1e1e1e, -6px -6px 12px #363636;
+}
+
+.dark .neuro-button-accent:hover {
+  box-shadow: 4px 4px 8px #1e1e1e, -4px -4px 8px #363636;
+}
+
+.dark .neuro-button-accent:active {
+  box-shadow: inset 3px 3px 6px #4a6a58, inset -3px -3px 6px #7ca28c;
+}
+
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .neuro-card {
@@ -261,4 +307,38 @@ body {
   .neuro-card:hover {
     box-shadow: 8px 8px 16px #bebebe, -8px -8px 16px #ffffff;
   }
+  
+  .dark .neuro-card {
+    box-shadow: 6px 6px 12px #1e1e1e, -6px -6px 12px #363636;
+  }
+  
+  .dark .neuro-card:hover {
+    box-shadow: 8px 8px 16px #1e1e1e, -8px -8px 16px #363636;
+  }
+}
+
+/* Theme Transition Animations */
+.theme-transitioning * {
+  transition: background-color 500ms ease, color 500ms ease, box-shadow 500ms ease, border-color 500ms ease !important;
+}
+
+.theme-ripple {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(142, 182, 155, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: all 500ms ease-out;
+}
+
+.theme-ripple.active {
+  width: 200vmax;
+  height: 200vmax;
+  opacity: 1;
 }
