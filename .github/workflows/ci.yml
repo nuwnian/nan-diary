@@ -32,9 +32,10 @@ jobs:
       - name: Install start-server-and-test
         run: npm install -g start-server-and-test
       - name: Run Cypress E2E tests with server
-        run: start-server-and-test dev http://localhost:5173 cypress:run
+        run: start-server-and-test dev:http://localhost:5173 cypress:run
         env:
           NODE_ENV: test
+          PORT: 5173
       - name: Print server logs if failed
         if: failure()
         run: |
