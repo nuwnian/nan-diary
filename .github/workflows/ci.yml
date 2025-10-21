@@ -29,7 +29,16 @@ jobs:
         run: npm run dev &
         env:
           NODE_ENV: test
-      - name: Wait for frontend to be ready
-        run: npx wait-on http://localhost:5173
-      - name: Run Cypress E2E tests
-        run: npx cypress run
+      - name: Install start-server-and-test
+        run: npm install -g start-server-and-test
+      - name: Run Cypress E2E tests with server
+        run: start-server-and-test dev http://localhost:5173 cypress:run
+        env:
+          NODE_ENV: test
+      - name: Print server logs if failed
+        if: failure()
+        run: |
+          echo "--- Frontend server log ---"
+          cat ./logs/server.log || echo "No server log found."
+          echo "--- Cypress log ---"
+          cat ./cypress/logs/cypress.log || echo "No Cypress log found."
