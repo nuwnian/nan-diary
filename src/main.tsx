@@ -8,6 +8,47 @@ import { initFirebase } from './platform/config.js'
 // Initialize Firebase before rendering the app
 initFirebase();
 
+// Initialize authService wrapper after Firebase is ready
+(function () {
+    function ensureFirebase() {
+        if (!window.firebaseAuth) {
+            throw new Error('Firebase not initialized. Call initFirebase() first.');
+        }
+    }
+
+    async function signIn(useRedirect: boolean) {
+        ensureFirebase();
+        const provider = new window.GoogleAuthProvider();
+        if (useRedirect) {
+            return window.signInWithRedirect(window.firebaseAuth, provider);
+        }
+        return window.signInWithPopup(window.firebaseAuth, provider);
+    }
+
+    async function getRedirectResult() {
+        ensureFirebase();
+        return window.getRedirectResult(window.firebaseAuth);
+    }
+
+    function onAuthStateChanged(callback: (user: any) => void) {
+        ensureFirebase();
+        return window.onAuthStateChanged(window.firebaseAuth, callback);
+    }
+
+    function signOut() {
+        ensureFirebase();
+        return window.firebaseAuth.signOut();
+    }
+
+    // Expose on window for App.tsx
+    window.authService = {
+        signIn,
+        getRedirectResult,
+        onAuthStateChanged,
+        signOut
+    };
+})();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
