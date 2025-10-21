@@ -109,10 +109,22 @@ export default function App() {
             photoURL: firebaseUser.photoURL,
             uid: firebaseUser.uid,
           });
+          // Set Sentry user context for error tracking
+          if (typeof window !== 'undefined' && (window as any).Sentry) {
+            (window as any).Sentry.setUser({
+              id: firebaseUser.uid,
+              email: firebaseUser.email,
+              username: firebaseUser.displayName || firebaseUser.email,
+            });
+          }
           loadUserNotes(firebaseUser.uid);
         } else {
           setUser(null);
           setCards([]);
+          // Clear Sentry user context on sign out
+          if (typeof window !== 'undefined' && (window as any).Sentry) {
+            (window as any).Sentry.setUser(null);
+          }
         }
       });
     }

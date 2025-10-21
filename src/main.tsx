@@ -4,6 +4,10 @@ import './style/globals.css'
 import App from './App.tsx'
 // @ts-ignore
 import { initFirebase } from './platform/config.js'
+import { initSentry } from './lib/sentry'
+
+// Initialize Sentry for error tracking (before Firebase and React)
+initSentry();
 
 // Initialize Firebase before rendering the app
 initFirebase();
@@ -49,8 +53,12 @@ initFirebase();
     };
 })();
 
+import ErrorBoundary from './components/ErrorBoundary';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 )
