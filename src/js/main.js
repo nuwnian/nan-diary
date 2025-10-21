@@ -119,10 +119,6 @@ async function signInWithGoogle() {
     }
 }
 
-function signOutUser() {
-    window.firebaseAuth.signOut();
-}
-
 // Handle mobile redirect authentication result
 async function handleMobileRedirectResult() {
     // Check for redirect results (works for both mobile and desktop)
@@ -391,7 +387,6 @@ async function saveProjectsToCloud() {
         // Don't show alerts for save errors, just log them
     }
 }
-const emojis = ['🌸', '🍂', '☁️', '✨', '🌙', '🌿', '🎨', '📖', '🕊️', '🦋'];
 
 const projects = [
     { title: 'Spring Collection', date: 'October 10, 2025', emoji: '🌸', notes: '' },
@@ -400,7 +395,6 @@ const projects = [
 ];
 
 let currentProjectIndex = null;
-let pendingDeleteIndex = null;
 
 function renderProjects() {
     const grid = document.getElementById('projectsGrid');
@@ -415,92 +409,6 @@ function renderProjects() {
         </div>
     `).join('');
 }
-
-// Emoji set used for picker (expanded options)
-const emojiOptions = ['🌸','🍂','☁️','✨','🌙','🌿','🎨','📖','🕊️','🦋','📌','⭐','🔥','🍀','🍎','🎵','🌺','🌻','🌷','🌹','🌼','🍃','🌱','🌳','🎯','🏆','💡','🎪','🎭','🎪','🎡','🎢'];
-
-function buildEmojiPicker(index) {
-    // builds a small emoji picker element
-    const picker = document.createElement('div');
-    picker.className = 'emoji-picker';
-    picker.addEventListener('click', (evt) => evt.stopPropagation());
-    const grid = document.createElement('div');
-    grid.className = 'emoji-grid';
-    emojiOptions.forEach((emoji) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = emoji;
-        btn.addEventListener('click', (ev) => {
-            ev.stopPropagation();
-            ev.preventDefault();
-            selectEmoji(index, emoji);
-        });
-        grid.appendChild(btn);
-    });
-    picker.appendChild(grid);
-    return picker;
-}
-
-function toggleDetailEmojiPicker() {
-    const picker = document.getElementById('detailEmojiPicker');
-    if (!picker) {return;}
-    
-    if (picker.style.display === 'none') {
-        // Show picker
-        picker.innerHTML = '';
-        const grid = document.createElement('div');
-        grid.className = 'emoji-grid';
-        
-        emojiOptions.forEach((emoji) => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = emoji;
-            btn.addEventListener('click', () => {
-                selectDetailEmoji(emoji);
-            });
-            grid.appendChild(btn);
-        });
-        
-        picker.appendChild(grid);
-        picker.style.display = 'block';
-    } else {
-        // Hide picker
-        picker.style.display = 'none';
-    }
-}
-
-function selectDetailEmoji(emoji) {
-    if (currentProjectIndex !== null && currentProjectIndex >= 0 && currentProjectIndex < projects.length) {
-        projects[currentProjectIndex].emoji = emoji;
-        
-        // Update the emoji button in detail view
-        const emojiBtn = document.getElementById('detailEmojiBtn');
-        if (emojiBtn) {
-            emojiBtn.textContent = emoji;
-        }
-        
-        // Hide picker
-        const picker = document.getElementById('detailEmojiPicker');
-        if (picker) {
-            picker.style.display = 'none';
-        }
-        
-        // Update the main grid (this will be visible when user closes detail)
-        renderProjects();
-        saveProjectsToCloud(); // Save to cloud after emoji change
-    }
-}
-
-function selectEmoji(index, emoji) {
-    if (index >= 0 && index < projects.length) {
-        projects[index].emoji = emoji;
-        // close all pickers
-        document.querySelectorAll('.emoji-picker').forEach(p => p.remove());
-        renderProjects();
-    }
-}
-
-// Removed old modal-based detail view, confirmation modal, and related handlers to avoid confusion.
 
 document.getElementById('searchBar').addEventListener('input', (e) => {
     const searchTerm = e.target.value.toLowerCase();
