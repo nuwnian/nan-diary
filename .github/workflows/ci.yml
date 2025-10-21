@@ -25,10 +25,6 @@ jobs:
         run: npm test
       - name: Run backend tests
         run: cd server && npm test
-      - name: Start frontend server
-        run: npm run dev &
-        env:
-          NODE_ENV: test
       - name: Install start-server-and-test
         run: npm install -g start-server-and-test
       - name: Run Cypress E2E tests with server
@@ -36,6 +32,8 @@ jobs:
         env:
           NODE_ENV: test
           PORT: 5173
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          CI: true
       - name: Print server logs if failed
         if: failure()
         run: |
