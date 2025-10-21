@@ -34,3 +34,18 @@ mobile-test.html
 
 # Replacement file produced by scripts/scrub-history.ps1 (may contain plaintext secrets)
 replacements.txt
+
+# Additional API key protection
+.env.*
+!.env.example
+!.env.local.example
+config-with-keys.*
+*-config.js
+*-keys.*
+service-account*.json
+firebase-adminsdk*.json
+
+# Any backup files that might contain keys
+*.backup
+*.orig
+config.backup.*
