@@ -1,11 +1,98 @@
+// Extend window type for authService
+declare global {
+  interface Window {
+    authService?: {
+      onAuthStateChanged?: (cb: (user: any) => void) => void;
+    };
+  }
+}
 import { useState, useEffect } from 'react';
+
+function CopyEmailField() {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <input
+        type="text"
+        value="yulfa.anni531@gmail.com"
+        readOnly
+        className="border rounded-lg px-3 py-2 text-[#333] flex-1 bg-[#f9f9f9] focus:outline-none"
+        style={{ minWidth: '0' }}
+        onFocus={e => e.target.select()}
+      />
+      <button
+        className="neuro-button px-3 py-2 rounded-lg text-[#333] border border-[#8EB69B] hover:bg-[#f5f5f5]"
+        onClick={() => {
+          navigator.clipboard.writeText('yulfa.anni531@gmail.com');
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        }}
+        title="Copy email address"
+      >
+        {copied ? 'Copied!' : 'Copy'}
+      </button>
+    </div>
+  );
+}
+// User type for auth
+type AuthUser = {
+  displayName?: string;
+  email?: string;
+  photoURL?: string;
+  uid?: string;
+};
 import SignUp from './components/signup';
 import Login from './components/login';
 import Footer from './components/footer';
 import { Sheet, SheetContent } from './components/ui/sheet';
+import CloverIcon from './components/CloverIcon';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup' | 'login'>('dashboard');
+  // Google sign-in handler for React
+  const handleGoogleSignIn = async () => {
+    if (!window.firebaseAuth || !window.GoogleAuthProvider) {
+      alert('Firebase not initialized.');
+      return;
+    }
+    try {
+      const provider = new window.GoogleAuthProvider();
+      const result = await window.signInWithPopup(window.firebaseAuth, provider);
+      const user = result.user;
+      setUser({
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        uid: user.uid,
+      });
+    } catch (error) {
+      let message = 'Sign in failed.';
+      if (typeof error === 'object' && error && 'message' in error) {
+        message = 'Sign in failed: ' + (error as any).message;
+      } else if (typeof error === 'string') {
+        message = 'Sign in failed: ' + error;
+      }
+      alert(message);
+    }
+  };
+  const [user, setUser] = useState<AuthUser | null>(null);
+  // Listen for auth state changes (Google/Facebook)
+  useEffect(() => {
+    if (window.authService && window.authService.onAuthStateChanged) {
+      window.authService.onAuthStateChanged((firebaseUser: any) => {
+        if (firebaseUser) {
+          setUser({
+            displayName: firebaseUser.displayName,
+            email: firebaseUser.email,
+            photoURL: firebaseUser.photoURL,
+          });
+        } else {
+          setUser(null);
+        }
+      });
+    }
+  }, []);
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup' | 'login' | 'support'>('dashboard');
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   // Simple URL-based routing
   useEffect(() => {
@@ -51,36 +138,51 @@ export default function App() {
     { id: 'home', label: 'Home', icon: 'bx-home' },
     { id: 'tasks', label: 'Tasks', icon: 'bx-task' },
     { id: 'files', label: 'Files', icon: 'bx-file' },
-    { id: 'analytics', label: 'Analytics', icon: 'bx-bar-chart' },
-    { id: 'support', label: 'Support', icon: 'bx-support' },
+    { id: 'gallery', label: 'Gallery', icon: 'bx-images' },
+    { id: 'support', label: 'Support', icon: 'bx-support', onClick: () => setIsSupportModalOpen(true) },
   ];
 
-  const cards = [
+  const defaultImage = '/src/assets/note-default.svg';
+  const [cards, setCards] = useState([
     {
       id: 1,
       title: 'Modern Architecture',
       description: 'Explore contemporary design and structural innovation in urban spaces.',
-      image: 'https://images.unsplash.com/photo-1519662978799-2f05096d3636?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MXx8fHwxNzYwODA1NTk2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+      image: defaultImage,
     },
     {
       id: 2,
       title: 'Nature Landscape',
       description: 'Discover serene natural environments and breathtaking vistas.',
-      image: 'https://images.unsplash.com/photo-1617634667039-8e4cb277ab46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmUlMjBsYW5kc2NhcGV8ZW58MXx8fHwxNzYwODYwNzkxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+      image: defaultImage,
     },
     {
       id: 3,
       title: 'Interior Design',
       description: 'Curated spaces that blend functionality with aesthetic beauty.',
-      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbnRlcmlvciUyMGRlc2lnbnxlbnwxfHx8fDE3NjA4MzUxMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+      image: defaultImage,
     },
     {
       id: 4,
       title: 'Minimal Workspace',
       description: 'Clean and organized environments for productivity and focus.',
-      image: 'https://images.unsplash.com/photo-1542435503-956c469947f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsJTIwd29ya3NwYWNlfGVufDF8fHx8MTc2MDgwNDMyMnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+      image: defaultImage,
     },
-  ];
+  ]);
+
+  // Handle image upload for a card
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, cardId: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const newCards = cards.map(card =>
+        card.id === cardId ? { ...card, image: ev.target?.result as string } : card
+      );
+      setCards(newCards);
+    };
+    reader.readAsDataURL(file);
+  };
 
   if (currentPage === 'signup') {
     return <SignUp onNavigate={navigateTo} />;
@@ -90,6 +192,35 @@ export default function App() {
     return <Login onNavigate={navigateTo} />;
   }
 
+  // Remove the support page route, support is now a modal
+  // Support Modal Dialog
+  const SupportModal = () => (
+    isSupportModalOpen ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full relative">
+          <button
+            className="absolute top-3 right-3 text-[#666] hover:text-[#333] text-2xl"
+            onClick={() => setIsSupportModalOpen(false)}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <h2 className="text-2xl font-bold mb-4 text-[#333]">Support</h2>
+          <p className="mb-4 text-[#666]">If you need help or have questions, please contact me for support service.</p>
+          <CopyEmailField />
+          <a
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=yulfa.anni531@gmail.com"
+            className="neuro-button px-6 py-3 rounded-xl text-[#333] font-semibold block text-center border border-[#8EB69B] hover:bg-[#f5f5f5]"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Send via Gmail
+          </a>
+        </div>
+      </div>
+    ) : null
+  );
+
   const NavigationMenu = () => (
     <nav className="space-y-4">
       {navLinks.map((link) => (
@@ -98,6 +229,7 @@ export default function App() {
           onClick={() => {
             setActiveLink(link.id);
             setIsMobileMenuOpen(false);
+            if (link.onClick) link.onClick();
           }}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[#333] transition-all ${
             activeLink === link.id ? 'neuro-button active' : 'neuro-button'
@@ -114,10 +246,12 @@ export default function App() {
 
   return (
     <div className="neuro-bg min-h-screen flex">
+      <SupportModal />
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 p-6 neuro-bg flex-shrink-0">
-        <div className="mb-8">
-          <h1 className="text-[#333] text-center">Dashboard</h1>
+        <div className="mb-8 flex items-center justify-center gap-2">
+          <CloverIcon size={28} className="text-[#8EB69B]" />
+          <h1 className="text-[#333]">Dashboard</h1>
         </div>
         <NavigationMenu />
       </aside>
@@ -125,8 +259,9 @@ export default function App() {
       {/* Mobile Sidebar */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
         <SheetContent side="left" className="neuro-bg border-0 p-6">
-          <div className="mb-8">
-            <h1 className="text-[#333] text-center">Dashboard</h1>
+          <div className="mb-8 flex items-center justify-center gap-2">
+            <CloverIcon size={28} className="text-[#8EB69B]" />
+            <h1 className="text-[#333]">Dashboard</h1>
           </div>
           <NavigationMenu />
         </SheetContent>
@@ -159,30 +294,46 @@ export default function App() {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-3 ml-auto">
-              <span className="text-[#333] hidden lg:block">Welcome back, User</span>
+              <span className="text-[#333] hidden lg:block">
+                {user ? `Welcome back, ${user.displayName || user.email || 'User'}` : 'Welcome back, User'}
+              </span>
               
               {/* Login Button */}
-              <button 
-                onClick={() => navigateTo('login')}
-                className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] flex items-center gap-2"
-              >
-                <i className="bx bx-log-in text-lg lg:text-xl"></i>
-                <span className="hidden sm:inline">Login</span>
-              </button>
+              {!user && (
+                <button 
+                  onClick={handleGoogleSignIn}
+                  className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] flex items-center gap-2"
+                >
+                  <i className="bx bx-log-in text-lg lg:text-xl"></i>
+                  <span className="hidden sm:inline">Sign In with Google</span>
+                </button>
+              )}
 
               {/* Sign Up Button */}
-              <button 
-                onClick={() => navigateTo('signup')}
-                className="neuro-button-accent rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-white flex items-center gap-2"
-              >
-                <i className="bx bx-user-plus text-lg lg:text-xl"></i>
-                <span className="hidden sm:inline">Sign Up</span>
-              </button>
+              {!user && (
+                <button 
+                  onClick={() => navigateTo('signup')}
+                  className="neuro-button-accent rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-white flex items-center gap-2"
+                >
+                  <i className="bx bx-user-plus text-lg lg:text-xl"></i>
+                  <span className="hidden sm:inline">Sign Up</span>
+                </button>
+              )}
 
               {/* User Icon */}
-              <div className="neuro-card rounded-full w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center overflow-hidden">
-                <i className="bx bx-user text-xl lg:text-2xl text-[#666]"></i>
-              </div>
+              {user && (
+                <div className="neuro-card rounded-full w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center overflow-hidden">
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || 'User Avatar'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <i className="bx bx-user text-xl lg:text-2xl text-[#666]"></i>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -206,12 +357,25 @@ export default function App() {
                   key={card.id}
                   className="neuro-card rounded-3xl overflow-hidden cursor-pointer"
                 >
-                  <div className="aspect-[16/9] overflow-hidden">
+                  <div className="aspect-[16/9] overflow-hidden flex flex-col items-center justify-center relative group">
                     <img
                       src={card.image}
                       alt={card.title}
                       className="w-full h-full object-cover"
+                      style={{ maxHeight: '180px', background: '#faf8f3' }}
                     />
+                    <label
+                      className="absolute inset-0 flex items-center justify-center text-base text-white bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer font-semibold z-10"
+                      style={{ pointerEvents: 'auto', marginTop: 0 }}
+                    >
+                      Change Image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={(e) => handleImageUpload(e, card.id)}
+                      />
+                    </label>
                   </div>
                   <div className="p-4 lg:p-6">
                     <h3 className="text-[#333] mb-2">{card.title}</h3>

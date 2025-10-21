@@ -29,9 +29,9 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="neuro-card rounded-xl w-10 h-10 flex items-center justify-center">
+              <a href="/" className="neuro-card rounded-xl w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#8EB69B]">
                 <CloverIcon size={24} className="text-[#8EB69B]" />
-              </div>
+              </a>
               <span className="text-[#333]">Dashboard</span>
             </div>
             <p className="text-[#666] mb-4">

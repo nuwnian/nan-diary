@@ -25,3 +25,11 @@ jobs:
         run: npm test
       - name: Run backend tests
         run: cd server && npm test
+      - name: Start frontend server
+        run: npm run dev &
+        env:
+          NODE_ENV: test
+      - name: Wait for frontend to be ready
+        run: npx wait-on http://localhost:5173
+      - name: Run Cypress E2E tests
+        run: npx cypress run

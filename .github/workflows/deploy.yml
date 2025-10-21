@@ -92,6 +92,14 @@ jobs:
       env:
         FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
         
+    - name: 🌐 Start frontend server
+      run: npm run dev &
+      env:
+        NODE_ENV: test
+    - name: ⏳ Wait for frontend to be ready
+      run: npx wait-on http://localhost:5173
+    - name: 🧪 Run Cypress E2E tests
+      run: npx cypress run
     - name: 🔥 Deploy to Firebase Hosting
       run: firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}" --project ${{ env.FIREBASE_PROJECT_ID }}
       env:
