@@ -50,42 +50,20 @@
             <input type="text" class="search-bar" placeholder="Search projects..." id="searchBar">
             <button class="sign-in-btn" onclick="signInWithGoogle()" id="signInBtn">Sign In</button>
             <button class="sign-out-btn" onclick="signOutUser()" id="signOutBtn" style="display:none;">Sign Out</button>
-            <button class="add-btn" onclick="addNewProject()">+ Add Plan</button>
+            <button class="add-btn" onclick="window.open('public/user-note.html', '_blank')">+ Add Plan</button>
         </div>
         <div class="mobile-menu" id="mobileMenu" style="display:none;">
             <input type="text" class="search-bar mobile" placeholder="Search projects..." id="mobileSearch">
             <button class="sign-in-btn" onclick="signInWithGoogle()" id="mobileSignInBtn">Sign In</button>
             <button class="sign-out-btn" onclick="signOutUser()" id="mobileSignOutBtn" style="display:none;">Sign Out</button>
-            <button class="add-btn" onclick="addNewProject()">+ Add Plan</button>
+            <button class="add-btn" onclick="window.open('public/user-note.html', '_blank')">+ Add Plan</button>
         </div>
         <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" onclick="toggleMobileMenu()" style="display:none;"></div>
     </nav>
     
     <div class="container">
         <div class="projects-grid" id="projectsGrid">
-            <div class="project-card" onclick="openDetail(0)">
-                <div class="card-image">🌸</div>
-                <div class="card-content">
-                    <div class="card-title">Spring Collection</div>
-                    <div class="card-date">October 10, 2025</div>
-                </div>
-            </div>
-            
-            <div class="project-card" onclick="openDetail(1)">
-                <div class="card-image">🍂</div>
-                <div class="card-content">
-                    <div class="card-title">Autumn Curriculum</div>
-                    <div class="card-date">October 8, 2025</div>
-                </div>
-            </div>
-            
-            <div class="project-card" onclick="openDetail(2)">
-                <div class="card-image">☁️</div>
-                <div class="card-content">
-                    <div class="card-title">Dream Project</div>
-                    <div class="card-date">October 5, 2025</div>
-                </div>
-            </div>
+            <!-- Project cards will be dynamically loaded here. -->
         </div>
     </div>
     
@@ -107,36 +85,7 @@
         </div>
     </footer>
     
-    <div class="detail-view" id="detailView">
-        <div class="detail-content">
-            <button class="close-btn" onclick="closeDetail()">×</button>
-            <div class="detail-header">
-                <input type="text" class="detail-title" id="detailTitle" placeholder="Project Title">
-                <button class="detail-emoji-btn" id="detailEmojiBtn" aria-label="Change emoji">🎨</button>
-            </div>
-            <div class="detail-date" id="detailDate">October 12, 2025</div>
-            <div class="detail-emoji-picker" id="detailEmojiPicker" style="display: none;"></div>
-            <div class="detail-toolbar">
-                <button type="button" class="toolbar-btn" id="boldBtn" title="Bold"><b>B</b></button>
-                <span class="toolbar-separator">|</span>
-                <button type="button" class="toolbar-btn" id="bulletBtn" title="Bullets">&#8226;</button>
-                <span class="toolbar-separator">|</span>
-                <input type="number" id="fontSizeInput" class="toolbar-input" title="Font Size (px)" min="10" max="48" value="16" />
-            </div>
-            <div contenteditable="true" class="detail-notes" id="detailNotes" placeholder="Write your plans, notes, and ideas here..."></div>
-        </div>
-    </div>
-    
-    <!-- Delete confirmation modal -->
-    <div class="confirm-view" id="confirmView" style="display:none;">
-        <div class="confirm-content">
-            <div class="confirm-message">Are you sure you want to delete this diary?</div>
-            <div class="confirm-actions">
-                <button id="confirmCancel" class="confirm-btn">Cancel</button>
-                <button id="confirmOk" class="confirm-btn confirm-ok">Delete</button>
-            </div>
-        </div>
-    </div>
+    <!-- Removed old modal-based detail view and confirmation modal to avoid confusion. -->
     
     <script type="module">
         // Import security utilities

@@ -2,7 +2,14 @@
 declare global {
   interface Window {
     authService?: {
+      signIn?: (useRedirect: boolean) => Promise<any>;
+      getRedirectResult?: () => Promise<any>;
       onAuthStateChanged?: (cb: (user: any) => void) => void;
+      signOut?: () => Promise<void>;
+    };
+    notesService?: {
+      loadProjects?: (userId: string) => Promise<any[]>;
+      saveProjects?: (userId: string, projects: any[]) => Promise<any>;
     };
   }
 }
@@ -47,35 +54,51 @@ import Footer from './components/footer';
 import { Sheet, SheetContent } from './components/ui/sheet';
 import CloverIcon from './components/CloverIcon';
 
+// Card type for Firestore notes
+type NoteCard = {
+  id: string | number;
+  title: string;
+  description: string;
+  image?: string;
+  date?: string;
+};
+
 export default function App() {
-  // Google sign-in handler for React
+  // Google sign-in implementation
   const handleGoogleSignIn = async () => {
-    if (!window.firebaseAuth || !window.GoogleAuthProvider) {
-      alert('Firebase not initialized.');
-      return;
-    }
-    try {
-      const provider = new window.GoogleAuthProvider();
-      const result = await window.signInWithPopup(window.firebaseAuth, provider);
-      const user = result.user;
-      setUser({
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        uid: user.uid,
-      });
-    } catch (error) {
-      let message = 'Sign in failed.';
-      if (typeof error === 'object' && error && 'message' in error) {
-        message = 'Sign in failed: ' + (error as any).message;
-      } else if (typeof error === 'string') {
-        message = 'Sign in failed: ' + error;
+    if (window.authService && window.authService.signIn) {
+      try {
+        await window.authService.signIn(false);
+      } catch (e) {
+        alert('Google sign-in failed.');
       }
-      alert(message);
+    } else {
+      alert('Google sign-in not available.');
     }
   };
   const [user, setUser] = useState<AuthUser | null>(null);
-  // Listen for auth state changes (Google/Facebook)
+  const defaultImage = '/src/assets/note-default.svg';
+  const [cards, setCards] = useState<NoteCard[]>([]);
+
+  // Load notes from Firestore
+  const loadUserNotes = async (uid?: string) => {
+    if (!uid || !window.notesService || !window.notesService.loadProjects) return;
+    try {
+      const projects = await window.notesService.loadProjects(uid);
+      setCards(
+        projects.map((note: any, idx: number) => ({
+          id: note.id || idx,
+          title: note.title || 'Untitled',
+          description: note.notes || '',
+          image: note.image || defaultImage,
+          date: note.date,
+        }))
+      );
+    } catch (e) {
+      setCards([]);
+    }
+  };
+  // Listen for auth state changes (Google/Facebook) and load notes
   useEffect(() => {
     if (window.authService && window.authService.onAuthStateChanged) {
       window.authService.onAuthStateChanged((firebaseUser: any) => {
@@ -84,14 +107,26 @@ export default function App() {
             displayName: firebaseUser.displayName,
             email: firebaseUser.email,
             photoURL: firebaseUser.photoURL,
+            uid: firebaseUser.uid,
           });
+          loadUserNotes(firebaseUser.uid);
         } else {
           setUser(null);
+          setCards([]);
         }
       });
     }
   }, []);
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup' | 'login' | 'support'>('dashboard');
+
+  // Reload notes when window regains focus (e.g. after closing note editor tab)
+  useEffect(() => {
+    const onFocus = () => {
+      if (user && user.uid) loadUserNotes(user.uid);
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [user]);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   // Simple URL-based routing
@@ -142,36 +177,10 @@ export default function App() {
     { id: 'support', label: 'Support', icon: 'bx-support', onClick: () => setIsSupportModalOpen(true) },
   ];
 
-  const defaultImage = '/src/assets/note-default.svg';
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      title: 'Modern Architecture',
-      description: 'Explore contemporary design and structural innovation in urban spaces.',
-      image: defaultImage,
-    },
-    {
-      id: 2,
-      title: 'Nature Landscape',
-      description: 'Discover serene natural environments and breathtaking vistas.',
-      image: defaultImage,
-    },
-    {
-      id: 3,
-      title: 'Interior Design',
-      description: 'Curated spaces that blend functionality with aesthetic beauty.',
-      image: defaultImage,
-    },
-    {
-      id: 4,
-      title: 'Minimal Workspace',
-      description: 'Clean and organized environments for productivity and focus.',
-      image: defaultImage,
-    },
-  ]);
+  // (removed duplicate cards state)
 
   // Handle image upload for a card
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, cardId: number) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, cardId: string | number) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -344,7 +353,10 @@ export default function App() {
             {/* Header with New Button */}
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-[#333]">Projects</h2>
-              <button className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] flex items-center gap-2">
+              <button
+                className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] flex items-center gap-2"
+                onClick={() => window.open('/public/user-note.html', '_blank')}
+              >
                 <i className="bx bx-plus text-lg lg:text-xl text-[#8EB69B]"></i>
                 <span>New</span>
               </button>
