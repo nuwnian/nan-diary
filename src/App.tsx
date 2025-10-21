@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect, useCallback } from 'react';
 import SignUp from './components/signup';
 import Login from './components/login';
 import Footer from './components/footer';
@@ -89,7 +90,7 @@ function AppContent() {
   const [cards, setCards] = useState<NoteCard[]>([]);
 
   // Load notes from Firestore
-  const loadUserNotes = async (uid?: string) => {
+  const loadUserNotes = useCallback(async (uid?: string) => {
     if (!uid || !window.notesService?.loadProjects) {
 
       return;
@@ -106,10 +107,10 @@ function AppContent() {
 
       setCards(mappedCards);
     } catch (e) {
-      console.error('[DEBUG] Error loading projects:', e);
+      console.error('Error loading projects:', e);
       setCards([]);
     }
-  };
+  }, []);
   
 
   // Listen for auth state changes (Google/Facebook) and load notes
@@ -142,7 +143,7 @@ function AppContent() {
         }
       });
     }
-  }, []);
+  }, [loadUserNotes]);
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup' | 'login' | 'support'>('dashboard');
 
 
@@ -165,7 +166,7 @@ function AppContent() {
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('storage', onStorage);
     };
-  }, [user]);
+  }, [user, loadUserNotes]);
 
   // Close profile menu when clicking outside
   useEffect(() => {

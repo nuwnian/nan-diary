@@ -27,9 +27,9 @@ export function initFirebase() {
         apiKey = window.ENV.FIREBASE_API_KEY;
     }
     
-    // Final fallback for development
+    // Final fallback - require environment variable
     if (!apiKey || apiKey === "PLACEHOLDER_FOR_BUILD_INJECTION") {
-        apiKey = "AIzaSyDNqD7y8ikTpUOdjzILErMXoQ44xKjVLgQ"; // Your project's actual API key
+        throw new Error('Firebase API key not found. Please set VITE_FIREBASE_API_KEY in your .env.local file.');
     }
     
     window.ENV.FIREBASE_API_KEY = apiKey;

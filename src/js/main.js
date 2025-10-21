@@ -395,7 +395,7 @@ const projects = [
     { title: 'Dream Project', date: 'October 5, 2025', emoji: '☁️', notes: '' }
 ];
 
-const currentProjectIndex = null;
+
 
 function renderProjects() {
     const grid = document.getElementById('projectsGrid');
