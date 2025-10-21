@@ -97,7 +97,7 @@ jobs:
       env:
         NODE_ENV: test
     - name: ⏳ Wait for frontend to be ready
-      run: npx wait-on http://localhost:5173
+      run: npx wait-on http://localhost:3000
     - name: 🧪 Run Cypress E2E tests
       run: npx cypress run
     - name: 🔥 Deploy to Firebase Hosting
