@@ -206,7 +206,28 @@
             opacity: 1;
             pointer-events: auto;
         }
-    </style>
+        </style>
+        <style>
+        /* Responsive Quill toolbar for mobile */
+        @media (max-width: 600px) {
+            #quill-toolbar {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                white-space: nowrap;
+            }
+            .ql-toolbar.ql-snow {
+                padding: 8px 2px;
+            }
+            .editor-section {
+                padding: 0 8px;
+            }
+            .toolbar-btn, .ql-toolbar button, .ql-toolbar .ql-picker {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 12px !important;
+            }
+        }
+        </style>
 </head>
 <body>
     <div class="container" style="position:relative;">
