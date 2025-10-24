@@ -30,18 +30,63 @@ async function signInWithGoogle() {
         console.log('Signed in successfully');
     } catch (error) {
         console.error('Sign in failed:', error);
-        // Helpful guidance for common Firebase auth error when domain not authorized
+        
+        // Handle different error types with appropriate user feedback
         try {
             const code = error && error.code ? error.code : '';
+            const message = error && error.message ? error.message.toLowerCase() : '';
+            
+            // Handle Firebase internal assertion error (race condition in popup flow)
+            if (message.includes('pending promise was never set') || 
+                message.includes('internal assertion failed')) {
+                console.warn('Sign-in popup closed prematurely or encountered a timing issue. This is usually harmless.');
+                // Don't show an alert for this transient error as it's usually not user-actionable
+                // The user can simply try again if they want to sign in
+                return;
+            }
+            
+            // Handle popup closed by user
+            if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+                console.log('Sign-in cancelled by user');
+                // No alert needed - user intentionally closed the popup
+                return;
+            }
+            
+            // Handle unauthorized domain error
             if (code === 'auth/unauthorized-domain') {
                 const origin = window.location.origin || window.location.href;
                 const msg = `Sign-in blocked: the domain ${origin} is not authorized for Firebase Authentication.\n\nTo fix: open your Firebase Console -> Authentication -> Settings -> Authorized domains and add:\n${origin}`;
-                // Show an alert to the user and log a console link for advanced users
                 alert(msg);
                 console.info('Open Firebase Console -> Authentication -> Settings and add the domain above.');
+                return;
+            }
+            
+            // Handle popup blocked by browser
+            if (code === 'auth/popup-blocked') {
+                alert('Sign-in popup was blocked by your browser. Please allow popups for this site and try again.');
+                return;
+            }
+            
+            // Handle network errors
+            if (code === 'auth/network-request-failed') {
+                alert('Network error occurred. Please check your internet connection and try again.');
+                return;
+            }
+            
+            // Handle timeout errors
+            if (code === 'auth/timeout') {
+                alert('Sign-in timed out. Please try again.');
+                return;
+            }
+            
+            // For any other errors, show a generic message
+            if (code && code.startsWith('auth/')) {
+                console.error('Authentication error:', code);
+                alert('Sign-in failed. Please try again. If the problem persists, please contact support.');
             }
         } catch (e) {
-            // ignore secondary errors while reporting
+            // Ignore secondary errors while reporting
+            console.error('Error while handling sign-in error:', e);
         }
     }
 }
