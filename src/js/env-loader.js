@@ -8,12 +8,12 @@ class EnvLoader {
         
         return {
             apiKey: apiKey,
-            authDomain: "nan-diary-6cdba.firebaseapp.com",
-            projectId: "nan-diary-6cdba",
-            storageBucket: "nan-diary-6cdba.firebasestorage.app",
-            messagingSenderId: "709052515369",
-            appId: "1:709052515369:web:0457058cd8b7d22010c838",
-            measurementId: "G-KJZR72YVR8"
+            authDomain: 'nan-diary-6cdba.firebaseapp.com',
+            projectId: 'nan-diary-6cdba',
+            storageBucket: 'nan-diary-6cdba.firebasestorage.app',
+            messagingSenderId: '709052515369',
+            appId: '1:709052515369:web:0457058cd8b7d22010c838',
+            measurementId: 'G-KJZR72YVR8'
         };
     }
     
@@ -37,12 +37,12 @@ class EnvLoader {
         }
         
         // 4. Fallback placeholder
-        return "SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY";
+        return 'SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY';
     }
     
     static isConfigured() {
         const apiKey = this.getApiKey();
-        return apiKey && apiKey !== "SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY";
+        return apiKey && apiKey !== 'SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY';
     }
 }
 

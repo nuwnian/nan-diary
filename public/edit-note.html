@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script defer src="/authService.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Note</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+            color: #5a4a3a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 2rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08), 0 1.5px 6px rgba(196,165,123,0.04);
+            width: 90vw;
+            height: 85vh;
+            margin: 5vh auto;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 40px 40px 0 40px;
+        }
+
+        .title-input {
+            border: none;
+            font-size: 18px;
+            color: #333;
+            outline: none;
+            flex: 1;
+            font-weight: 400;
+        }
+
+        .editor-section {
+            margin-bottom: 30px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 40px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #8EB69B;
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.2s;
+            font-weight: bold;
+            padding: 0 8px;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="position:relative;">
+        <div class="header">
+            <input type="text" class="title-input" placeholder="Note title..." id="taskTitle">
+        </div>
+
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <div class="editor-section">
+            <div id="quill-toolbar">
+                <span class="ql-formats">
+                    <button class="ql-bold" title="Bold"></button>
+                    <button class="ql-italic" title="Italic"></button>
+                    <button class="ql-strike" title="Strikethrough"></button>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-link" title="Insert Link"></button>
+                    <button class="ql-list" value="ordered" title="Numbered List"></button>
+                    <button class="ql-list" value="bullet" title="Bullet List"></button>
+                    <button class="ql-indent" value="-1" title="Decrease Indent" style="font-size: 12px; font-weight: bold;">◄</button>
+                    <button class="ql-indent" value="+1" title="Increase Indent" style="font-size: 12px; font-weight: bold;">►</button>
+                </span>
+                <span class="ql-formats">
+                    <select class="ql-size" title="Font Size">
+                        <option value="small">Small</option>
+                        <option selected>Normal</option>
+                        <option value="large">Large</option>
+                        <option value="huge">Huge</option>
+                    </select>
+                </span>
+                <span class="ql-formats">
+                    <select class="ql-color" title="Font Color"></select>
+                </span>
+            </div>
+            <div id="quill-editor" style="height: 50vh;"></div>
+        </div>
+        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <button class="close-btn" title="Close">&times;</button>
+    </div>
+
+    <script type="module">
+        import('../src/platform/config.js').then(({ initFirebase }) => {
+            initFirebase();
+            import('../src/services/notesService.js').then(() => {
+                let currentUserId = null;
+                let currentNoteId = null;
+                let originalTitle = '';
+                let originalContent = '';
+
+                // Get note ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                currentNoteId = urlParams.get('id');
+
+                window.authService.onAuthStateChanged(async (user) => {
+                    if (!user) {
+                        alert('You must be signed in to edit notes.');
+                        window.close();
+                        return;
+                    }
+                    currentUserId = user.uid;
+                    
+                    // Load existing note
+                    if (currentNoteId) {
+                        try {
+                            const projects = await window.notesService.loadProjects(currentUserId);
+                            const note = projects.find(p => p.id == currentNoteId);
+                            if (note) {
+                                document.getElementById('taskTitle').value = note.title || '';
+                                originalTitle = note.title || '';
+                                originalContent = note.notes || '';
+                                quill.root.innerHTML = note.notes || '';
+                            }
+                        } catch (e) {
+                            console.error('Error loading note:', e);
+                        }
+                    }
+                });
+
+                // Initialize Quill editor
+                const quill = new Quill('#quill-editor', {
+                    modules: {
+                        toolbar: '#quill-toolbar',
+                        history: { delay: 1000, maxStack: 100, userOnly: true }
+                    },
+                    theme: 'snow'
+                });
+
+                // Auto-save function
+                const autoSave = async () => {
+                    const title = document.getElementById('taskTitle').value;
+                    const description = quill.root.innerHTML;
+                    
+                    // Check if content changed
+                    if (title === originalTitle && description === originalContent) {
+                        return false; // No changes
+                    }
+                    
+                    if (!title.trim() && quill.getText().trim().length <= 1) {
+                        return false; // Empty note
+                    }
+                    
+                    if (!currentUserId || !currentNoteId) {
+                        return false;
+                    }
+                    
+                    try {
+                        let projects = await window.notesService.loadProjects(currentUserId);
+                        const noteIndex = projects.findIndex(p => p.id == currentNoteId);
+                        
+                        if (noteIndex !== -1) {
+                            // Update existing note
+                            projects[noteIndex] = {
+                                ...projects[noteIndex],
+                                title: title || 'Untitled Note',
+                                notes: description,
+                                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                            };
+                            
+                            await window.notesService.saveProjects(currentUserId, projects);
+                            localStorage.setItem('nan-diary-note-added', Date.now().toString());
+                            return true;
+                        }
+                    } catch (e) {
+                        console.error('Auto-save failed:', e);
+                        return false;
+                    }
+                };
+
+                document.querySelector('.close-btn').addEventListener('click', async function() {
+                    await autoSave();
+                    window.close();
+                });
+                
+                window.addEventListener('beforeunload', async function(e) {
+                    await autoSave();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

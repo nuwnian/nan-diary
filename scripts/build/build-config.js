@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const CONFIG_TEMPLATE = {
-    apiKey: process.env.FIREBASE_API_KEY || 'SECURE_PLACEHOLDER_DO_NOT_COMMIT_REAL_KEY',
+    apiKey: 'window.ENV.FIREBASE_API_KEY', // This placeholder will reference the injected value
     authDomain: 'nan-diary-6cdba.firebaseapp.com',
     projectId: 'nan-diary-6cdba',
     storageBucket: 'nan-diary-6cdba.firebasestorage.app',
@@ -24,7 +24,15 @@ function replaceConfigInFile(filePath) {
     
     // Replace the Firebase config
     const configRegex = /const firebaseConfig = \{[\s\S]*?\};/;
-    const newConfig = `const firebaseConfig = ${JSON.stringify(CONFIG_TEMPLATE, null, 4)};`;
+    const newConfig = `const firebaseConfig = {
+    "apiKey": window.ENV.FIREBASE_API_KEY,
+    "authDomain": "${CONFIG_TEMPLATE.authDomain}",
+    "projectId": "${CONFIG_TEMPLATE.projectId}",
+    "storageBucket": "${CONFIG_TEMPLATE.storageBucket}",
+    "messagingSenderId": "${CONFIG_TEMPLATE.messagingSenderId}",
+    "appId": "${CONFIG_TEMPLATE.appId}",
+    "measurementId": "${CONFIG_TEMPLATE.measurementId}"
+};`;
     
     content = content.replace(configRegex, newConfig);
     
