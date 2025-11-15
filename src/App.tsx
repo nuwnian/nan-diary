@@ -9,6 +9,8 @@ import ThemeToggle from './components/ThemeToggle';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './components/ThemeProvider';
 import Card from './components/Card';
+import NoteEditor from './components/NoteEditor';
+import DigitalClock from './components/DigitalClock';
 
 // Extend window type for authService
 declare global {
@@ -88,6 +90,8 @@ function AppContent() {
   };
   const [user, setUser] = useState<AuthUser | null>(null);
   const [cards, setCards] = useState<NoteCard[]>([]);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | number | undefined>(undefined);
 
   // Load notes from Firestore
   const loadUserNotes = useCallback(async (uid?: string) => {
@@ -301,6 +305,24 @@ function AppContent() {
   return (
     <div className="neuro-bg min-h-screen flex">
       <SupportModal />
+      
+      {/* Note Editor Modal */}
+      {isEditorOpen && user?.uid && (
+        <NoteEditor
+          noteId={editingNoteId}
+          userId={user.uid}
+          onClose={() => {
+            setIsEditorOpen(false);
+            setEditingNoteId(undefined);
+          }}
+          onSave={() => {
+            // Reload notes after save
+            if (user?.uid) {
+              loadUserNotes(user.uid);
+            }
+          }}
+        />
+      )}
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 p-6 neuro-bg flex-shrink-0">
         <div className="mb-8 flex items-center justify-center gap-2">
@@ -346,11 +368,28 @@ function AppContent() {
               </div>
             </div>
 
+            {/* Digital Clock */}
+            <div className="hidden lg:block">
+              <DigitalClock />
+            </div>
+
             {/* Right Side Actions */}
             <div className="flex items-center gap-3 ml-auto">
-              <span className="text-[#333] dark:text-[#e0e0e0] hidden lg:block">
-                {user ? `Welcome back, ${user.displayName || user.email || 'User'}` : 'Welcome back, User'}
-              </span>
+              {/* Welcome Message with Profile Picture */}
+              <div className="hidden lg:flex items-center gap-2">
+                {user && user.photoURL && (
+                  <div className="w-8 h-8 rounded-full overflow-hidden neuro-inset">
+                    <img 
+                      src={user.photoURL} 
+                      alt={user.displayName || 'User'} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <span className="text-[#333] dark:text-[#e0e0e0]">
+                  {user ? `Welcome back, ${user.displayName || user.email || 'User'}` : 'Welcome back, User'}
+                </span>
+              </div>
               
               {/* Login Button */}
               {!user && (
@@ -481,7 +520,10 @@ function AppContent() {
               <h2 className="text-[#333] dark:text-[#e0e0e0]">Projects</h2>
               <button
                 className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] dark:text-[#e0e0e0] flex items-center gap-2"
-                onClick={() => window.open('/user-note.html', '_blank')}
+                onClick={() => {
+                  setEditingNoteId(undefined);
+                  setIsEditorOpen(true);
+                }}
               >
                 <i className="bx bx-plus text-lg lg:text-xl text-[#8EB69B]"></i>
                 <span>New</span>
@@ -496,7 +538,10 @@ function AppContent() {
                   title={card.title}
                   date={card.date || ''}
                   image={card.image}
-                  onClick={() => window.open(`/edit-note.html?id=${card.id}`, '_blank')}
+                  onClick={() => {
+                    setEditingNoteId(card.id);
+                    setIsEditorOpen(true);
+                  }}
                   onDelete={async (e) => {
                     e.stopPropagation();
                     const updated = cards.filter((_, i) => i !== idx);
