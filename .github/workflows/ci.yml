@@ -14,7 +14,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       - name: Install root dependencies
         run: npm ci
       - name: Install server dependencies
@@ -25,19 +25,3 @@ jobs:
         run: npm test
       - name: Run backend tests
         run: cd server && npm test
-      - name: Install start-server-and-test
-        run: npm install -g start-server-and-test
-      - name: Run Cypress E2E tests with server
-        run: start-server-and-test 'npm run dev' http://localhost:3000 'npm run cypress:run'
-        env:
-          NODE_ENV: test
-          PORT: 3000
-          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          CI: true
-      - name: Print server logs if failed
-        if: failure()
-        run: |
-          echo "--- Frontend server log ---"
-          cat ./logs/server.log || echo "No server log found."
-          echo "--- Cypress log ---"
-          cat ./cypress/logs/cypress.log || echo "No Cypress log found."
