@@ -1,886 +1,188 @@
-# Nan Diary# Nan Diary# Nan Diary# Nan Diary
-
-
+# Nan Diary
 
 A cozy, full-stack diary app for creative project planning with Firebase integration.
 
+Live demo: https://nan-diary-6cdba.web.app
 
+Overview
+--------
+Nan Diary is a lightweight project/diary app built with a React + TypeScript frontend (Vite), an Express backend, and Firebase for authentication and Cloud Firestore for data persistence. It includes a rich text editor for notes, emoji-based project customization, auto-save, and a UI built with Radix primitives and a neumorphic design.
 
-## 🏗️ ArchitectureA cozy, full-stack diary app for creative project planning with Firebase integration.
+Highlights
+- Google sign-in (Firebase)
+- Rich text editor for project notes
+- Auto-save and responsive UI (desktop and mobile)
+- Server-side validation and security checks
+- Deployable to Firebase Hosting and Cloud Run / App Engine
+- Includes tests, gitleaks scanning in CI, and pre-commit/pre-push hooks
 
+Table of Contents
+-----------------
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Development](#development)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
+- [API (Server)](#api-server)
+- [Security](#security)
+- [CI / CD](#ci--cd)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
-
-**Full-Stack Application:**
-
-- **Frontend:** React 18 + TypeScript + Vite with Radix UI components
-
-- **Backend:** Node.js + Express API with Firebase Admin SDK## ArchitectureA cozy, full-stack diary app for creative project planning with Firebase integration.A small static diary-like project to plan and track creative projects.
-
-- **Database:** Cloud Firestore
-
-- **Hosting:** Firebase Hosting (frontend) + Cloud Run/App Engine (backend)
-
-- **UI Library:** 47 Radix UI primitives with neumorphic design system
-
-**Full-Stack Application:**
-
-## ✨ Features
-
-- **Frontend:** React 18 + TypeScript + Vite with Radix UI components
-
-- 🔐 Google authentication with Firebase
-
-- 📝 Rich text editor for project notes- **Backend:** Node.js + Express API with Firebase Admin SDK## 🏗️ ArchitectureProject structure
-
-- 🎨 Emoji picker for project customization
-
-- 💾 Auto-save functionality- **Database:** Cloud Firestore
-
-- 📱 Responsive design (desktop + mobile)
-
-- 🔒 Server-side validation and security- **Hosting:** Firebase Hosting (frontend) + Cloud Run/App Engine (backend)
-
-- 🌐 REST API architecture
-
-- ✅ Comprehensive test coverage- **UI Library:** 47 Radix UI primitives with neumorphic design system
-
-
-
-## 🚀 Quick Start**Full-Stack Application:**- index.html - main HTML file (loads CSS/JS from `src/`)
-
-
-
-### Prerequisites## Features
-
-
-
-- Node.js >= 18.0.0- **Frontend:** React 18 + TypeScript + Vite with Radix UI components- src/css/style.css - extracted styles
-
-- npm >= 9.0.0
-
-- Firebase project with Firestore enabled- Google authentication with Firebase
-
-- Firebase CLI for deployment (`npm install -g firebase-tools`)
-
-- Rich text editor for project notes- **Backend:** Node.js + Express API with Firebase Admin SDK- src/js/main.js - extracted JavaScript
-
-### Installation
-
-- Emoji picker for project customization
-
-1. **Clone and install dependencies:**
-
-- Auto-save functionality- **Database:** Cloud Firestore- assets/ - (optional) images or other media
+Quick Start
+-----------
+Clone, install, configure, and run:
 
 ```bash
-
-git clone https://github.com/nuwnian/nan-diary.git- Responsive design (desktop + mobile)
-
+git clone https://github.com/nuwnian/nan-diary.git
 cd nan-diary
 
-npm run setup- Server-side validation and security- **Hosting:** Firebase Hosting (frontend) + Cloud Run/App Engine (backend)
-
-```
-
-- REST API architecture
-
-2. **Configure environment:**
-
-- Comprehensive test coverage- **UI Library:** 47 Radix UI primitives with neumorphic design systemHow to use
-
-```bash
-
-# Create local environment file
-
-cp .env.local.example .env.local
-
-# Edit .env.local and add your Firebase API key:## Quick Start
-
-# VITE_FIREBASE_API_KEY=your-firebase-web-api-key
-
-
-
-# Backend config (if running backend locally)
-
-cd server### Prerequisites## ✨ Features1. Open `index.html` in your browser (double-click or serve with a static server).
-
-cp .env.example .env
-
-# Edit .env and add Firebase service account credentials
-
-```
-
-- Node.js >= 18.0.02. Add plans with the "+ Add Plan" button and edit details in the detail view.
-
-3. **Run the application:**
-
-- npm >= 9.0.0
-
-```bash
-
-# Development mode with hot reload- Firebase project with Firestore enabled- 🔐 Google authentication with Firebase
-
-npm run dev
-
-- Firebase CLI for deployment (`npm install -g firebase-tools`)
-
-# Production build
-
-npm run build- 📝 Rich text editor for project notesMaintenance tips
-
-
-
-# Preview production build locally### Installation
-
-npm run preview
-
-```- 🎨 Emoji picker for project customization
-
-
-
-**Development server:** `http://localhost:3000`  1. **Clone and install dependencies:**
-
-**Backend API (if running):** `http://localhost:3001`
-
-- 💾 Auto-save functionality- Keep CSS in `src/css/` and JS in `src/js/` for easier editing.
-
-## 📚 Documentation
-
-```bash
-
-- **[Pre-Deployment Checklist](PRE-DEPLOYMENT-CHECKLIST.md)** - Comprehensive deployment guide
-
-- **[Full-Stack Setup Guide](docs/FULLSTACK-SETUP.md)** - Complete setup instructionsgit clone https://github.com/nuwnian/nan-diary.git- 📱 Responsive design (desktop + mobile)- Consider adding a small build step (e.g., npm, parcel, or vite) if you add modules.
-
-- **[Backend API Documentation](server/README.md)** - API endpoints and server details
-
-- **[Security Documentation](docs/SECURITY-BUG-DOCUMENTATION.md)** - Security practicescd nan-diary
-
-- **[DevOps Guide](docs/DEVOPS-GUIDE.md)** - CI/CD and deployment
-
-- **[UI Attributions](src/Attributions.md)** - Radix UI component creditsnpm run setup- 🔒 Server-side validation and security- Add unit tests and linting when the project grows.
-
-
-
-## 🔧 Development```
-
-
-
-### Available Scripts- 🌐 REST API architecture# Security & local development (updated)
-
-
-
-```bash2. **Configure environment:**
-
-# Development
-
-npm run dev                  # Start Vite dev server with hot reload- ✅ Comprehensive test coverage
-
-npm run dev:fullstack        # Run frontend + backend together
-
-```bash
-
-# Building
-
-npm run build               # Build for production (TypeScript + Vite)# Create local environment fileImportant: do not commit secret keys (API keys, service account JSON, `.env.local`). The project now uses a local env injection step so you can keep secrets out of git.
-
-npm run preview             # Preview production build locally
-
-cp .env.local.example .env.local
-
-# Testing
-
-npm test                    # Run frontend tests# Edit .env.local and add your Firebase API key:## 🚀 Quick Start
-
-npm run test:backend        # Run backend tests
-
-npm run test:all            # Run all tests# VITE_FIREBASE_API_KEY=your-firebase-web-api-key
-
-npm run cypress:open        # Open Cypress test runner
-
-npm run cypress:run         # Run Cypress E2E testsQuickstart (PowerShell)
-
-
-
-# Code Quality# Backend config (if running backend locally)
-
-npm run lint                # Lint TypeScript/React code
-
-npm run lint:backend        # Lint backend codecd server### Prerequisites
-
-npm run security-check      # Run npm audit
-
-cp .env.example .env
-
-# Deployment
-
-firebase deploy             # Deploy to Firebase Hosting# Edit .env and add Firebase service account credentials1. Copy the example env file and fill in real values:
-
-```
-
-```
-
-## 🛠️ Tech Stack
-
-- Node.js >= 18.0.0
-
-**Frontend:**
-
-- React 18.3.1 with TypeScript 5.6.33. **Run the application:**
-
-- Vite 5.4.20 for blazing fast builds
-
-- Tailwind CSS 3.4.15 with custom neumorphic design- npm >= 9.0.0```powershell
-
-- Radix UI primitives (47 accessible components)
-
-- Lucide React for icons```bash
-
-- Firebase SDK 10.7.1 for authentication
-
-# Development mode with hot reload- Firebase project with Firestore enabledcp .env.local.example .env.local
-
-**Backend:**
-
-- Node.js + Expressnpm run dev
-
-- Firebase Admin SDK
-
-- Jest for testing- Firebase CLI for deployment (`npm install -g firebase-tools`)# edit .env.local in a text editor and paste your real values
-
-
-
-**Build Output:**# Production build
-
-- Optimized bundle: ~271 KB → 79 KB gzipped (71% reduction)
-
-- Build time: ~8 seconds for 1642 modulesnpm run build```
-
-- Output directory: `deploy/`
-
-
-
-## 🎨 UI Components
-
-# Preview production build locally### Installation
-
-The project includes 47 production-ready Radix UI components with neumorphic styling:
-
-npm run preview
-
-<details>
-
-<summary>View all components</summary>```2. Install dev dependencies (if not already):
-
-
-
-- Accordion, Alert, Alert Dialog, Aspect Ratio, Avatar
-
-- Badge, Breadcrumb, Button, Calendar, Card, Carousel, Chart
-
-- Checkbox, Collapsible, Command, Context Menu, Dropdown Menu**Development server:** `http://localhost:3000`  1. **Clone and install dependencies:**
-
-- Dialog, Drawer, Form, Hover Card, Input (OTP & standard), Label
-
-- Menubar, Navigation Menu, Pagination, Popover, Progress**Backend API (if running):** `http://localhost:3001`
-
-- Radio Group, Resizable, Scroll Area, Select, Separator
-
-- Sheet, Sidebar, Skeleton, Slider, Sonner (Toast), Switch```powershell
-
-- Table, Tabs, Textarea, Toggle (Group & standard), Tooltip
-
-## Documentation
-
-</details>
-
-```bashnpm install
-
-## 🔒 Security
-
-- **[Pre-Deployment Checklist](PRE-DEPLOYMENT-CHECKLIST.md)** - Comprehensive deployment guide
-
-**5-Layer Security Architecture:**
-
-- **[Full-Stack Setup Guide](docs/FULLSTACK-SETUP.md)** - Complete setup instructionsgit clone https://github.com/nuwnian/nan-diary.git```
-
-1. **Build-time API key injection** - No hardcoded secrets
-
-2. **Gitleaks scanning** - Automated secret detection in CI/CD- **[Backend API Documentation](server/README.md)** - API endpoints and server details
-
-3. **Firestore security rules** - User-scoped data access
-
-4. **Firebase Auth** - Google OAuth with domain restrictions- **[Security Documentation](SECURITY-BUG-DOCUMENTATION.md)** - Security practicescd nan-diary
-
-5. **HTTPS enforcement** - All traffic encrypted
-
-- **[DevOps Guide](DEVOPS-GUIDE.md)** - CI/CD and deployment
-
-**Git Hooks:**
-
-- Pre-commit: Scans for secrets before committing- **[UI Attributions](src/Attributions.md)** - Radix UI component creditsnpm run setup3. Start the dev server (this injects the API key from `.env.local` into local HTML files):
-
-- Pre-push: Final secret check before pushing to remote
-
-- Custom patterns: Detects API keys, tokens, private keys
-
-
-
-To enable git hooks:## Development```
-
-```bash
-
-git config core.hooksPath .githooks
-
-```
-
-### Available Scripts```powershell
-
-## 📦 Project Structure
-
-
-
-```
-
-nan-diary/```bash2. **Configure environment:**npm run dev
-
-├── src/                    # Frontend source code
-
-│   ├── components/         # React components# Development
-
-│   ├── services/          # Firebase & API services
-
-│   ├── usecases/          # Business logicnpm run dev             # Start Vite dev server with hot reload```
-
-│   ├── platform/          # Platform configuration
-
-│   └── main.tsx           # Application entry pointnpm run build           # Build for production (TypeScript + Vite)
-
-├── server/                # Backend Node.js API
-
-│   ├── src/npm run preview         # Preview production build locally```bash
-
-│   │   ├── routes/        # Express routes
-
-│   │   ├── services/      # Business logic
-
-│   │   └── middleware/    # Auth & validation
-
-│   └── tests/             # Backend tests# Testing# Create local environment fileNotes
-
-├── deploy/                # Build output directory
-
-├── cypress/               # E2E testsnpm test                # Run frontend tests
-
-├── __tests__/             # Frontend unit tests
-
-├── docs/                  # Documentationnpm run test:backend    # Run backend testscp .env.local.example .env.local
-
-└── .github/workflows/     # CI/CD pipelines
-
-```npm run test:all        # Run all tests
-
-
-
-## 🚀 CI/CD Pipeline# Edit .env.local and add your Firebase API key:- The project contains `inject-env.js` which reads `.env.local` and injects `FIREBASE_API_KEY` into `dashboard.html` and `deploy/dashboard.html` before serving. This avoids committing the real key into the repo.
-
-
-
-Automated workflows on every push to `main`:# Code Quality
-
-
-
-1. **Quality Checks** - Linting, security audit, unit testsnpm run lint            # Lint TypeScript/React code# VITE_FIREBASE_API_KEY=your-firebase-web-api-key- If you accidentally committed an API key, rotate it in Google Cloud Console immediately (follow steps in `docs/FIREBASE-TROUBLESHOOTING.md`).
-
-2. **Build & Test** - TypeScript compilation, Vite build
-
-3. **E2E Tests** - Cypress tests (non-blocking)npm run lint:backend    # Lint backend code
-
-4. **Deploy** - Firebase Hosting deployment
-
-5. **Verify** - Post-deployment health check- To enable the local git hook that prevents committing `.env.local`, run:
-
-
-
-**Live Site:** https://nan-diary-6cdba.web.app# Deployment
-
-
-
-## 📝 Licensefirebase deploy         # Deploy to Firebase Hosting# Backend config (if running backend locally)
-
-
-
-MIT License - See LICENSE for details```
-
-
-
-## 👤 Authorcd server```powershell
-
-
-
-**nuwnian**## Tech Stack
-
-- GitHub: [@nuwnian](https://github.com/nuwnian)
-
-- Project: [nan-diary](https://github.com/nuwnian/nan-diary)cp .env.example .envgit config core.hooksPath .githooks
-
-
-
-## 🤝 Contributing**Frontend:**
-
-
-
-1. Fork the repository- React 18.3.1 with TypeScript 5.6.3# Edit .env and add Firebase service account credentials```
-
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)- Vite 5.4.20 for blazing fast builds
-
-4. Push to the branch (`git push origin feature/amazing-feature`)
-
-5. Open a Pull Request- Tailwind CSS 3.4.15 with custom neumorphic design```
-
-
-
-## 🙏 Acknowledgments- Radix UI primitives (47 accessible components)
-
-
-
-- Built with [Radix UI](https://www.radix-ui.com/) primitives- Lucide React for iconsIf you prefer not to use the hook, at a minimum ensure `.env.local` is listed in `.gitignore` (it already is).
-
-- Powered by [Firebase](https://firebase.google.com/)
-
-- Bundled with [Vite](https://vitejs.dev/)- Firebase SDK 10.7.1 for authentication
-
-- Icons from [Lucide](https://lucide.dev/)
-
-3. **Run the application:**
-
-**Build Output:**
-
-- Optimized bundle: ~271 KB → 79 KB gzipped (71% reduction)Example env file
-
-- Build time: ~8 seconds for 1642 modules
-
-- Output directory: `deploy/````bash
-
-
-
-## UI Components# Development mode with hot reloadYou can copy `.env.local.example` to `.env.local` and edit it with your real values. `.env.local.example` contains placeholder keys and is safe to commit.
-
-
-
-The project includes 47 production-ready Radix UI components with neumorphic styling:npm run dev#   S e c u r i t y   r e m e d i a t i o n   c o m p l e t e d   -   1 0 / 1 6 / 2 0 2 5   0 0 : 1 7 : 5 8 
-
-
-
-<details> 
-
-<summary>View all components</summary>
-
-# Production build 
-
-- Accordion, Alert, Alert Dialog, Aspect Ratio, Avatarnpm run build
-
-- Badge, Breadcrumb, Button, Calendar, Card, Carousel, Chart
-
-- Checkbox, Collapsible, Command, Context Menu, Dropdown Menu# Preview production build locally
-
-- Dialog, Drawer, Form, Hover Card, Input (OTP & standard), Labelnpm run preview
-
-- Menubar, Navigation Menu, Pagination, Popover, Progress```
-
-- Radio Group, Resizable, Scroll Area, Select, Separator
-
-- Sheet, Sidebar, Skeleton, Slider, Sonner (Toast), Switch**Development server:** `http://localhost:3000`  
-
-- Table, Tabs, Textarea, Toggle (Group & standard), Tooltip**Backend API (if running):** `http://localhost:3001`
-
-
-
-</details>## 📚 Documentation
-
-
-
-## Security- **[Pre-Deployment Checklist](PRE-DEPLOYMENT-CHECKLIST.md)** - Comprehensive deployment guide
-
-- **[Full-Stack Setup Guide](docs/FULLSTACK-SETUP.md)** - Complete setup instructions
-
-**5-Layer Security Architecture:**- **[Backend API Documentation](server/README.md)** - API endpoints and server details
-
-1. **Build-time API key injection** - No hardcoded secrets- **[Security Documentation](SECURITY-BUG-DOCUMENTATION.md)** - Security practices
-
-2. **Gitleaks scanning** - Automated secret detection in CI/CD- **[DevOps Guide](DEVOPS-GUIDE.md)** - CI/CD and deployment
-
-3. **Firestore security rules** - User-scoped data access- **[UI Attributions](src/Attributions.md)** - Radix UI component credits
-
-4. **Firebase Auth** - Google OAuth with domain restrictions
-
-5. **HTTPS enforcement** - All traffic encrypted## 🔧 Development
-
-
-
-See [PRE-DEPLOYMENT-CHECKLIST.md](PRE-DEPLOYMENT-CHECKLIST.md) for detailed security review.### Available Scripts
-
-
-
-## Project Structure```bash
-
-# Development
-
-```npm run dev             # Start Vite dev server with hot reload
-
-nan-diary/npm run build           # Build for production (TypeScript + Vite)
-
-├── src/npm run preview         # Preview production build locally
-
-│   ├── components/
-
-│   │   ├── ui/              # 47 Radix UI components# Testing
-
-│   │   ├── footer.tsx       # App footernpm test                # Run frontend tests
-
-│   │   └── signup.tsx       # Authentication UInpm run test:backend    # Run backend tests
-
-│   ├── js/npm run test:all        # Run all tests
-
-│   │   ├── config.js        # Firebase configuration
-
-│   │   ├── main.js          # Core application logic# Code Quality
-
-│   │   └── security.js      # Security utilitiesnpm run lint            # Lint TypeScript/React code
-
-│   ├── css/npm run lint:backend    # Lint backend code
-
-│   │   ├── style.css        # Legacy styles
-
-│   │   └── welcome.css      # Welcome page styles# Deployment
-
-│   ├── style/firebase deploy         # Deploy to Firebase Hosting
-
-│   │   └── globals.css      # Tailwind + custom styles```
-
-│   ├── App.tsx              # Main React app component
-
-│   └── main.tsx             # React entry point## 🛠️ Tech Stack
-
-├── deploy/                  # Production build output
-
-├── server/                  # Express backend API**Frontend:**
-
-├── .github/workflows/       # CI/CD pipelines- React 18.3.1 with TypeScript 5.6.3
-
-├── .githooks/               # Git security hooks- Vite 5.4.20 for blazing fast builds
-
-├── firebase.json            # Firebase Hosting config- Tailwind CSS 3.4.15 with custom neumorphic design
-
-├── firestore.rules          # Firestore security rules- Radix UI primitives (47 accessible components)
-
-├── vite.config.ts           # Vite build configuration- Lucide React for icons
-
-├── tailwind.config.js       # Tailwind CSS config- Firebase SDK 10.7.1 for authentication
-
-└── package.json             # Dependencies & scripts
-
-```**Build Output:**
-
-- Optimized bundle: ~271 KB → 79 KB gzipped (71% reduction)
-
-## Security & Local Development- Build time: ~8 seconds for 1642 modules
-
-- Output directory: `deploy/`
-
-**Important:** Never commit secret keys (API keys, service account JSON, `.env.local`).
-
-## 🎨 UI Components
-
-### Quick Setup (PowerShell)
-
-The project includes 47 production-ready Radix UI components with neumorphic styling:
-
-1. **Copy the example env file and add your Firebase API key:**
-
-<details>
-
-```powershell<summary>View all components</summary>
-
-cp .env.local.example .env.local
-
-# Edit .env.local and add: VITE_FIREBASE_API_KEY=your-api-key- Accordion, Alert, Alert Dialog, Aspect Ratio, Avatar
-
-```- Badge, Breadcrumb, Button, Calendar, Card, Carousel, Chart
-
-- Checkbox, Collapsible, Command, Context Menu, Dropdown Menu
-
-2. **Install dependencies:**- Dialog, Drawer, Form, Hover Card, Input (OTP & standard), Label
-
-- Menubar, Navigation Menu, Pagination, Popover, Progress
-
-```powershell- Radio Group, Resizable, Scroll Area, Select, Separator
-
-npm install- Sheet, Sidebar, Skeleton, Slider, Sonner (Toast), Switch
-
-```- Table, Tabs, Textarea, Toggle (Group & standard), Tooltip
-
-
-
-3. **Enable git security hooks:**</details>
-
-
-
-```powershell## 🔒 Security
-
-git config core.hooksPath .githooks
-
-```**5-Layer Security Architecture:**
-
-1. **Build-time API key injection** - No hardcoded secrets
-
-This enables:2. **Gitleaks scanning** - Automated secret detection in CI/CD
-
-- Pre-commit secret scanning (blocks commits with exposed secrets)3. **Firestore security rules** - User-scoped data access
-
-- Pre-push validation4. **Firebase Auth** - Google OAuth with domain restrictions
-
-- Automatic gitleaks integration5. **HTTPS enforcement** - All traffic encrypted
-
-
-
-### Environment VariablesSee [PRE-DEPLOYMENT-CHECKLIST.md](PRE-DEPLOYMENT-CHECKLIST.md) for detailed security review.
-
-
-
-**Development (.env.local):**## 📂 Project Structure
-
-```bash
-
-VITE_FIREBASE_API_KEY=your-firebase-web-api-key```
-
-```nan-diary/
-
-├── src/
-
-**CI/CD (GitHub Secrets):**│   ├── components/
-
-- `FIREBASE_API_KEY` - Firebase web API key│   │   ├── ui/              # 47 Radix UI components
-
-- `FIREBASE_TOKEN` - Firebase deployment token (from `firebase login:ci`)│   │   ├── footer.tsx       # App footer
-
-│   │   └── signup.tsx       # Authentication UI
-
-### Build-Time Injection│   ├── js/
-
-│   │   ├── config.js        # Firebase configuration
-
-The project uses Vite's `define` feature to inject environment variables at build time:│   │   ├── main.js          # Core application logic
-
-│   │   └── security.js      # Security utilities
-
-1. **Development:** Reads from `VITE_FIREBASE_API_KEY` in `.env.local`│   ├── css/
-
-2. **CI/CD:** Injects from `FIREBASE_API_KEY` or `VITE_FIREBASE_API_KEY` │   │   ├── style.css        # Legacy styles
-
-3. **Fallback:** Uses multi-source resolution in `src/platform/config.js`│   │   └── welcome.css      # Welcome page styles
-
-│   ├── style/
-
-**Never commit `.env.local`** - it's in `.gitignore` and blocked by pre-commit hooks.│   │   └── globals.css      # Tailwind + custom styles
-
-│   ├── App.tsx              # Main React app component
-
-## Testing & CI/CD│   └── main.tsx             # React entry point
-
-├── deploy/                  # Production build output
-
-### Running Tests Locally├── server/                  # Express backend API
-
-├── .github/workflows/       # CI/CD pipelines
-
-```powershell├── .githooks/               # Git security hooks
-
-# Frontend tests├── firebase.json            # Firebase Hosting config
-
-npm test├── firestore.rules          # Firestore security rules
-
-├── vite.config.ts           # Vite build configuration
-
-# Backend tests├── tailwind.config.js       # Tailwind CSS config
-
-npm run test:backend└── package.json             # Dependencies & scripts
-
-```
-
-# All tests
-
-npm run test:all## 🔐 Security & Local Development
-
-```
-
-**Important:** Never commit secret keys (API keys, service account JSON, `.env.local`).
-
-### CI/CD Workflows
-
-### Quick Setup (PowerShell)
-
-The project uses GitHub Actions for automated testing and deployment:
-
-1. **Copy the example env file and add your Firebase API key:**
-
-**1. Gitleaks Scan (`.github/workflows/gitleaks.yml`)**
-
-- Runs on every push```powershell
-
-- Scans for exposed secretscp .env.local.example .env.local
-
-- Blocks deployment if secrets detected# Edit .env.local and add: VITE_FIREBASE_API_KEY=your-api-key
-
-```
-
-**2. CI Workflow (`.github/workflows/ci.yml`)**
-
-- Linting (ESLint + TypeScript)2. **Install dependencies:**
-
-- Backend tests with Jest
-
-- Code quality checks```powershell
-
+# Install frontend + server deps (root scripts may install both)
 npm install
 
-**3. Deploy Workflow (`.github/workflows/deploy.yml`)**```
+# Copy example env and fill values
+cp .env.local.example .env.local
+# Edit .env.local and add VITE_FIREBASE_API_KEY and any other required values
 
-- **Stage 1:** Quality checks (lint + test)
+# Run frontend dev server
+npm run dev
 
-- **Stage 2:** Build test (production build verification)3. **Enable git security hooks:**
-
-- **Stage 3:** Deploy to Firebase Hosting
-
-- **Stage 4:** Verify deployment (smoke tests)```powershell
-
-git config core.hooksPath .githooks
-
-### Manual Deployment```
-
-
-
-```bashThis enables:
-
-# Build production bundle- Pre-commit secret scanning (blocks commits with exposed secrets)
-
-npm run build- Pre-push validation
-
-- Automatic gitleaks integration
-
-# Deploy to Firebase Hosting
-
-firebase deploy --only hosting### Environment Variables
-
-
-
-# Deploy with custom token (CI/CD)**Development (.env.local):**
-
-firebase deploy --only hosting --token "$FIREBASE_TOKEN"```bash
-
-```VITE_FIREBASE_API_KEY=your-firebase-web-api-key
-
+# (Optional) If you run the backend locally:
+cd server
+cp .env.example .env
+# Edit server/.env and add Firebase service account path or ADC settings
+npm install
+npm run dev
 ```
 
-## Deployment
+Prerequisites
+-------------
+- Node.js >= 18.x
+- npm >= 9.x
+- Firebase project with Firestore enabled
+- Firebase CLI (for deployment): npm install -g firebase-tools
 
-**CI/CD (GitHub Secrets):**
+Development
+-----------
+Available scripts (root):
+- npm run dev — Start frontend dev server (Vite)
+- npm run dev:fullstack — Run frontend + backend together (if configured)
+- npm run build — Build frontend for production
+- npm run preview — Preview production build locally
+- npm test — Run frontend tests
+- npm run test:backend — Run backend tests
+- npm run test:all — Run all tests
+- npm run lint — Lint frontend
+- npm run lint:backend — Lint backend
+- npm run security-check — Run npm audit
 
-**Live URL:** https://nan-diary-6cdba.web.app- `FIREBASE_API_KEY` - Firebase web API key
+See package.json for the full scripts list and server/README.md for backend-specific commands.
 
-- `FIREBASE_TOKEN` - Firebase deployment token (from `firebase login:ci`)
+Environment Variables
+---------------------
+Frontend (.env.local)
+- VITE_FIREBASE_API_KEY — Firebase web API key (used by Vite build)
 
-**Deployment Checklist:**
+Server (.env)
+- FIREBASE_PROJECT_ID — Firebase project ID
+- FIREBASE_SERVICE_ACCOUNT_PATH — Path to service account JSON (or use ADC)
+- PORT — Server port (default: 3001)
+- LOG_LEVEL — Logging verbosity (default: info)
+- CORS_ORIGIN — Allowed CORS origins (comma-separated)
 
-1. All tests passing### Build-Time Injection
+Never commit secrets or service account files. `.env.local` and `.env` should be in .gitignore and are blocked by pre-commit hooks.
 
-2. Build succeeds locally
+Project Structure
+-----------------
+High level:
 
-3. No security vulnerabilitiesThe project uses Vite's `define` feature to inject environment variables at build time:
-
-4. Environment variables configured in GitHub Secrets
-
-5. Firebase project configured1. **Development:** Reads from `VITE_FIREBASE_API_KEY` in `.env.local`
-
-2. **CI/CD:** Injects from `FIREBASE_API_KEY` or `VITE_FIREBASE_API_KEY` 
-
-See [PRE-DEPLOYMENT-CHECKLIST.md](PRE-DEPLOYMENT-CHECKLIST.md) for complete checklist.3. **Fallback:** Uses multi-source resolution in `src/platform/config.js`
-
-
-
----**Never commit `.env.local`** - it's in `.gitignore` and blocked by pre-commit hooks.
-
-
-
-## License## 🧪 Testing & CI/CD
-
-
-
-This project is private and proprietary.### Running Tests Locally
-
-
-```powershell
-# Frontend tests
-npm test
-
-# Backend tests
-npm run test:backend
-
-# All tests
-npm run test:all
+```
+nan-diary/
+├── src/               # Frontend: React + Vite + TypeScript
+│   ├── components/
+│   ├── services/
+│   └── main.tsx
+├── server/            # Backend: Express + Firebase Admin SDK
+│   ├── src/
+│   └── README.md
+├── deploy/            # Production build output
+├── cypress/           # E2E tests
+├── docs/
+└── package.json
 ```
 
-### CI/CD Workflows
+API (Server)
+------------
+The API server lives in the `server/` folder. See server/README.md for the full API reference, endpoints include:
+- GET /health
+- POST /api/auth/verify
+- GET /api/auth/me
+- POST /api/projects
+- POST /api/projects/add
+- PUT /api/projects/:index
+- DELETE /api/projects/:index
 
-The project uses GitHub Actions for automated testing and deployment:
+Security
+--------
+Security-first features:
+- Build-time API key injection (no hardcoded keys)
+- Gitleaks scanning in CI
+- Firestore security rules (user-scoped access)
+- Firebase Auth (Google OAuth) with optional domain restrictions
+- HTTPS enforced in production
+- Git hooks: pre-commit and pre-push scans for secrets
 
-**1. Gitleaks Scan (`.github/workflows/gitleaks.yml`)**
-- Runs on every push
-- Scans for exposed secrets
-- Blocks deployment if secrets detected
+See PRE-DEPLOYMENT-CHECKLIST.md and docs/SECURITY-BUG-DOCUMENTATION.md for details.
 
-**2. CI Workflow (`.github/workflows/ci.yml`)**
-- Linting (ESLint + TypeScript)
-- Backend tests with Jest
-- Code quality checks
+CI / CD
+-------
+Automated GitHub Actions workflows:
+1. Quality checks (linters, security scans)
+2. Build & tests
+3. E2E (Cypress, non-blocking)
+4. Deploy to Firebase Hosting
+5. Post-deploy verification
 
-**3. Deploy Workflow (`.github/workflows/deploy.yml`)**
-- **Stage 1:** Quality checks (lint + test)
-- **Stage 2:** Build test (production build verification)
-- **Stage 3:** Deploy to Firebase Hosting
-- **Stage 4:** Verify deployment (smoke tests)
-
-### Manual Deployment
-
+Deployment
+----------
+Manual:
 ```bash
-# Build production bundle
 npm run build
-
-# Deploy to Firebase Hosting
 firebase deploy --only hosting
-
-# Deploy with custom token (CI/CD)
+# or with CI token:
 firebase deploy --only hosting --token "$FIREBASE_TOKEN"
 ```
 
-## 🌐 Deployment
+For backend (Cloud Run):
+```bash
+docker build -t nan-diary-api .
+gcloud run deploy nan-diary-api --image nan-diary-api --platform managed --allow-unauthenticated
+```
 
-**Live URL:** https://nan-diary-6cdba.web.app
+Contributing
+------------
+Thanks for wanting to contribute! The basic flow:
+1. Fork the repo
+2. Create a feature branch: git checkout -b feature/your-feature
+3. Commit changes and run tests/lint
+4. Push and open a PR
 
-**Deployment Checklist:**
-1. ✅ All tests passing
-2. ✅ Build succeeds locally
-3. ✅ No security vulnerabilities
-4. ✅ Environment variables configured in GitHub Secrets
-5. ✅ Firebase project configured
+Please follow code style and add tests for new features. Make sure `.env.local` or other secrets are never committed.
 
-See [PRE-DEPLOYMENT-CHECKLIST.md](PRE-DEPLOYMENT-CHECKLIST.md) for complete checklist.
+License
+-------
+Decide and set a single license in the LICENSE file and update this section. Current repository README contains both "MIT" and "private/proprietary" — pick one and keep it consistent.
 
----
+Author & Acknowledgments
+------------------------
+- Author: nuwnian — https://github.com/nuwnian
+- Built with: Radix UI, Lucide icons, Firebase, Vite
 
-## 📄 License
-
-This project is private and proprietary.
-
+Further reading and docs
+------------------------
+- PRE-DEPLOYMENT-CHECKLIST.md
+- docs/FULLSTACK-SETUP.md
+- server/README.md (API docs)
+- docs/DEVOPS-GUIDE.md
+- docs/SECURITY-BUG-DOCUMENTATION.md
