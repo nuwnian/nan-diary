@@ -210,44 +210,81 @@
         </style>
         <style>
         /* Responsive Quill toolbar for mobile */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
             .container {
                 width: 100vw;
                 height: 100vh;
+                height: 100dvh; /* Dynamic viewport height for mobile browsers */
                 border-radius: 0;
                 margin: 0;
                 box-shadow: none;
             }
-            .header, .footer {
-                padding: 16px 2px 0 2px;
+
+            .header {
+                padding: 16px 16px 12px 16px;
+                margin-bottom: 12px;
             }
+
+            .footer {
+                padding: 12px 16px 16px 16px;
+            }
+
+            .title-input {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+
             .editor-section {
-                padding: 0 2px;
+                padding: 0 16px;
+                margin-bottom: 12px;
+                flex: 1;
+                overflow: hidden;
             }
+
             #quill-toolbar {
+                padding: 6px;
                 overflow-x: auto;
-                flex-wrap: nowrap;
                 white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
             }
-            #quill-editor {
-                min-height: 200px;
-                max-height: 50vh;
-                width: 100vw;
-                max-width: 100vw;
-                min-width: 0;
-            }
-            .description-input {
-                width: 100vw;
-                max-width: 100vw;
-                min-width: 0;
-            }
+
             .ql-toolbar.ql-snow {
-                padding: 4px 1px;
+                padding: 6px;
             }
-            .toolbar-btn, .ql-toolbar button, .ql-toolbar .ql-picker {
-                min-width: 28px !important;
-                min-height: 28px !important;
-                font-size: 12px !important;
+
+            .ql-toolbar button,
+            .ql-toolbar .ql-picker {
+                width: 28px !important;
+                height: 28px !important;
+                padding: 2px !important;
+            }
+
+            #quill-editor {
+                height: calc(100vh - 200px) !important;
+                height: calc(100dvh - 200px) !important;
+                min-height: unset !important;
+                max-height: unset !important;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+
+            .ql-editor {
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .description-input {
+                width: 100%;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+
+            .close-btn {
+                top: 12px;
+                right: 12px;
+                font-size: 32px;
+                padding: 4px 12px;
             }
         }
         </style>
