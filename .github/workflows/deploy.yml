@@ -53,6 +53,14 @@ jobs:
         run: npm install -g firebase-tools
       - name: Build project
         run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: nan-diary-6cdba.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: nan-diary-6cdba
+          VITE_FIREBASE_STORAGE_BUCKET: nan-diary-6cdba.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: 709052515369
+          VITE_FIREBASE_APP_ID: 1:709052515369:web:0457058cd8b7d22010c838
+          VITE_FIREBASE_MEASUREMENT_ID: G-KJZR72YVR8
       - name: Build Success
         run: |
           echo "Build completed successfully!"
@@ -77,6 +85,14 @@ jobs:
         run: npm install -g firebase-tools
       - name: Build project
         run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: nan-diary-6cdba.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: nan-diary-6cdba
+          VITE_FIREBASE_STORAGE_BUCKET: nan-diary-6cdba.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: 709052515369
+          VITE_FIREBASE_APP_ID: 1:709052515369:web:0457058cd8b7d22010c838
+          VITE_FIREBASE_MEASUREMENT_ID: G-KJZR72YVR8
       - name: Deploy to Firebase Hosting
         run: firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}" --project ${{ env.FIREBASE_PROJECT_ID }}
         env:
