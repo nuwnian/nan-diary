@@ -80,7 +80,12 @@ function AppContent() {
     if (window.authService && window.authService.signIn) {
       try {
         await window.authService.signIn(false);
-      } catch (e) {
+      } catch (e: any) {
+        // Suppress Firebase popup timing errors (user still gets signed in)
+        if (e?.code === 'auth/popup-closed-by-user' || e?.message?.includes('Pending promise')) {
+          console.log('Popup flow interrupted, but sign-in may have completed');
+          return;
+        }
         console.error('Sign-in error:', e);
         alert('Sign-in failed. Please try again.');
       }
@@ -92,6 +97,15 @@ function AppContent() {
   const [cards, setCards] = useState<NoteCard[]>([]);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | number | undefined>(undefined);
+  const [showAuthNotification, setShowAuthNotification] = useState(false);
+  const [authNotificationMessage, setAuthNotificationMessage] = useState('');
+
+  // Show custom notification
+  const showNotification = (message: string) => {
+    setAuthNotificationMessage(message);
+    setShowAuthNotification(true);
+    setTimeout(() => setShowAuthNotification(false), 3000);
+  };
 
   // Load notes from Firestore
   const loadUserNotes = useCallback(async (uid?: string) => {
@@ -376,20 +390,22 @@ function AppContent() {
             {/* Right Side Actions */}
             <div className="flex items-center gap-3 ml-auto">
               {/* Welcome Message with Profile Picture */}
-              <div className="hidden lg:flex items-center gap-2">
-                {user && user.photoURL && (
-                  <div className="w-8 h-8 rounded-full overflow-hidden neuro-inset">
-                    <img 
-                      src={user.photoURL} 
-                      alt={user.displayName || 'User'} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <span className="text-[#333] dark:text-[#e0e0e0]">
-                  {user ? `Welcome back, ${user.displayName || user.email || 'User'}` : 'Welcome back, User'}
-                </span>
-              </div>
+              {user && (
+                <div className="hidden lg:flex items-center gap-2">
+                  {user.photoURL && (
+                    <div className="w-8 h-8 rounded-full overflow-hidden neuro-inset">
+                      <img 
+                        src={user.photoURL} 
+                        alt={user.displayName || 'User'} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <span className="text-[#333] dark:text-[#e0e0e0]">
+                    Welcome back, {user.displayName || user.email || 'User'}
+                  </span>
+                </div>
+              )}
               
               {/* Login Button */}
               {!user && (
@@ -477,10 +493,30 @@ function AppContent() {
                       <div className="p-2">
                         <button
                           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[#333] dark:text-[#e0e0e0] hover:bg-[#f5f5f5] dark:hover:bg-[#363636] transition-colors"
-                          onClick={() => {
-                            // Add account switching logic here
-                            alert('Switch account feature - integrate with Google Account Chooser');
-                            setIsProfileMenuOpen(false);
+                          onClick={async () => {
+                            try {
+                              setIsProfileMenuOpen(false);
+                              // Sign out current user
+                              if (window.authService?.signOut) {
+                                await window.authService.signOut();
+                              }
+                              // Prompt for account selection on next sign-in
+                              if (window.GoogleAuthProvider) {
+                                const provider = new window.GoogleAuthProvider();
+                                provider.setCustomParameters({
+                                  prompt: 'select_account'
+                                });
+                                // Sign in with account chooser
+                                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                                if (isMobile) {
+                                  await window.signInWithRedirect(window.firebaseAuth, provider);
+                                } else {
+                                  await window.signInWithPopup(window.firebaseAuth, provider);
+                                }
+                              }
+                            } catch (e) {
+                              console.error('Switch account failed:', e);
+                            }
                           }}
                         >
                           <i className="bx bx-user-circle text-xl"></i>
@@ -512,6 +548,16 @@ function AppContent() {
           </div>
         </header>
 
+        {/* Auth Notification */}
+        {showAuthNotification && (
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+            <div className="neuro-card rounded-2xl px-6 py-4 shadow-lg flex items-center gap-3 bg-white dark:bg-[#2a2a2a]">
+              <i className="bx bx-info-circle text-2xl text-[#8EB69B]"></i>
+              <span className="text-[#333] dark:text-[#e0e0e0] font-medium">{authNotificationMessage}</span>
+            </div>
+          </div>
+        )}
+
         {/* Content Area */}
         <div className="flex-1 p-4 lg:p-6">
           <main className="max-w-7xl mx-auto mb-16">
@@ -521,6 +567,10 @@ function AppContent() {
               <button
                 className="neuro-button rounded-2xl px-4 py-2 lg:px-6 lg:py-3 text-[#333] dark:text-[#e0e0e0] flex items-center gap-2"
                 onClick={() => {
+                  if (!user) {
+                    showNotification('Please sign in or create an account to create a new project.');
+                    return;
+                  }
                   setEditingNoteId(undefined);
                   setIsEditorOpen(true);
                 }}
@@ -539,6 +589,10 @@ function AppContent() {
                   date={card.date || ''}
                   image={card.image}
                   onClick={() => {
+                    if (!user) {
+                      showNotification('Please sign in to view and edit your notes.');
+                      return;
+                    }
                     setEditingNoteId(card.id);
                     setIsEditorOpen(true);
                   }}

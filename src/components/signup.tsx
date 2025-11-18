@@ -45,10 +45,14 @@ export default function SignUp({ onNavigate }: SignUpProps) {
       if (formData.fullName && userCredential.user && userCredential.user.updateProfile) {
         await userCredential.user.updateProfile({ displayName: formData.fullName });
       }
-      setSuccess('Account created successfully!');
+      setSuccess('Account created successfully! Redirecting...');
+      
+      // Redirect to dashboard after brief success message
+      setTimeout(() => {
+        onNavigate('dashboard');
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   };
@@ -61,10 +65,14 @@ export default function SignUp({ onNavigate }: SignUpProps) {
       const auth = window.firebaseAuth;
       const provider = new window.GoogleAuthProvider();
       await window.signInWithPopup(auth, provider);
-      setSuccess('Signed up with Google!');
+      setSuccess('Signed up with Google! Redirecting...');
+      
+      // Redirect to dashboard after brief success message
+      setTimeout(() => {
+        onNavigate('dashboard');
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   };
@@ -78,10 +86,14 @@ export default function SignUp({ onNavigate }: SignUpProps) {
       const provider = window.FacebookAuthProvider ? new window.FacebookAuthProvider() : null;
       if (!provider) throw new Error('Facebook sign-up is not enabled.');
       await window.signInWithPopup(auth, provider);
-      setSuccess('Signed up with Facebook!');
+      setSuccess('Signed up with Facebook! Redirecting...');
+      
+      // Redirect to dashboard after brief success message
+      setTimeout(() => {
+        onNavigate('dashboard');
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   };
@@ -105,7 +117,12 @@ export default function SignUp({ onNavigate }: SignUpProps) {
             </div>
 
             {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
-            {success && <div className="text-green-600 mb-4 text-center">{success}</div>}
+            {success && (
+              <div className="text-green-600 mb-4 text-center flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                {success}
+              </div>
+            )}
 
             {/* Email Sign Up Form - Always Visible */}
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
