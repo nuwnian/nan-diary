@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useCallback } from 'react';
+import LandingPage from './components/LandingPage';
 import SignUp from './components/signup';
 import Login from './components/login';
 import Footer from './components/footer';
@@ -94,6 +95,7 @@ function AppContent() {
     }
   };
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [cards, setCards] = useState<NoteCard[]>([]);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | number | undefined>(undefined);
@@ -134,7 +136,7 @@ function AppContent() {
   // Listen for auth state changes (Google/Facebook) and load notes
   useEffect(() => {
     if (window.authService && window.authService.onAuthStateChanged) {
-      window.authService.onAuthStateChanged((firebaseUser: any) => {
+      const unsub = window.authService.onAuthStateChanged((firebaseUser: any) => {
         if (firebaseUser) {
           setUser({
             displayName: firebaseUser.displayName,
@@ -159,10 +161,12 @@ function AppContent() {
             (window as any).Sentry.setUser(null);
           }
         }
+        setAuthReady(true);
       });
+      return unsub;
     }
   }, [loadUserNotes]);
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'signup' | 'login' | 'support'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'landing' | 'dashboard' | 'signup' | 'login' | 'support'>('landing');
 
 
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
@@ -204,7 +208,7 @@ function AppContent() {
     };
   }, [isProfileMenuOpen]);
 
-  // Simple URL-based routing
+  // Simple URL-based routing — default to landing page for guests, dashboard for logged-in
   useEffect(() => {
     const path = window.location.pathname;
     if (path === '/signup') {
@@ -212,10 +216,13 @@ function AppContent() {
     } else if (path === '/login') {
       setCurrentPage('login');
     } else {
-      setCurrentPage('dashboard');
+      // If auth is already ready and user is logged in, go to dashboard; otherwise landing
+      setCurrentPage(authReady && user ? 'dashboard' : 'landing');
     }
+  }, [authReady, user]);
 
-    // Listen for browser navigation
+  // Listen for browser navigation
+  useEffect(() => {
     const handlePopState = () => {
       const currentPath = window.location.pathname;
       if (currentPath === '/signup') {
@@ -223,24 +230,33 @@ function AppContent() {
       } else if (currentPath === '/login') {
         setCurrentPage('login');
       } else {
-        setCurrentPage('dashboard');
+        setCurrentPage(authReady && user ? 'dashboard' : 'landing');
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [authReady, user]);
 
   const navigateTo = (page: 'dashboard' | 'signup' | 'login') => {
     const paths = {
       dashboard: '/',
-      signup: '/signup', 
+      signup: '/signup',
       login: '/login'
     };
-    
+
     window.history.pushState({}, '', paths[page]);
     setCurrentPage(page);
   };
+
+  // Auth gate: once ready, redirect logged-in users to dashboard if they're on landing
+  useEffect(() => {
+    if (!authReady) return;
+    if (user && currentPage === 'landing') {
+      navigateTo('dashboard');
+    }
+  }, [authReady, user, currentPage]);
+
   const [activeLink, setActiveLink] = useState('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -255,6 +271,11 @@ function AppContent() {
   // (removed duplicate cards state)
 
 
+
+  // Landing page for unauthenticated visitors
+  if (currentPage === 'landing') {
+    return <LandingPage onNavigate={navigateTo} />;
+  }
 
   if (currentPage === 'signup') {
     return <SignUp onNavigate={navigateTo} />;
